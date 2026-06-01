@@ -328,6 +328,17 @@ textarea {
   background: #e5fbfb;
 }
 
+.route-output .route-loading,
+.route-output .ai-preview {
+  grid-column: 1 / -1;
+}
+
+.ai-preview p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
 .metric {
   display: block;
   margin-bottom: 6px;

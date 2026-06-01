@@ -61,6 +61,62 @@ routeForm.addEventListener("submit", (event) => {
   const focus = mood === "balanced" ? "balanced route" : route[mood];
 
   routeOutput.innerHTML = `
+    <div class="route-loading">
+      <span class="metric">Planning...</span>
+      <small>Creating an AI route preview</small>
+    </div>
+  `;
+
+  generateAiPreview({ destination, guests, days, mood, vessel })
+    .then((preview) => {
+      routeOutput.innerHTML = `
+        <div class="ai-preview">
+          <span class="metric">AI preview</span>
+          <p>${formatPreview(preview)}</p>
+        </div>
+      `;
+    })
+    .catch(() => {
+      renderFallbackPreview({ route, guests, days, focus, vesselPlan });
+    });
+});
+
+async function generateAiPreview(routeRequest) {
+  const response = await fetch("/api/generate-route", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(routeRequest),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.error || "Could not generate route preview.");
+  }
+
+  return result.preview;
+}
+
+function formatPreview(preview) {
+  return preview
+    .replace(/[&<>"']/g, (character) => {
+      const entities = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;",
+      };
+      return entities[character];
+    })
+    .replace(/\n/g, "<br>");
+}
+
+/*
+Fallback preview for local static testing when /api/generate-route is not running.
+*/
+function renderFallbackPreview({ route, guests, days, focus, vesselPlan }) {
+  routeOutput.innerHTML = `
     <div>
       <span class="metric">${route.wind}</span>
       <small>forecast planning window</small>
@@ -74,4 +130,4 @@ routeForm.addEventListener("submit", (event) => {
       <small>${route.line}, ${focus}; ${vesselPlan.detail}</small>
     </div>
   `;
-});
+}
