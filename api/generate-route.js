@@ -78,7 +78,7 @@ Keep it client-friendly and no more than 700 words.`,
     }
 
     return response.status(200).json({
-      preview: data.output_text || "No preview generated.",
+      preview: extractOpenAIText(data) || "No preview generated.",
     });
   } catch (error) {
     return response.status(500).json({
@@ -86,3 +86,20 @@ Keep it client-friendly and no more than 700 words.`,
     });
   }
 };
+
+function extractOpenAIText(data) {
+  if (typeof data.output_text === "string" && data.output_text.trim()) {
+    return data.output_text;
+  }
+
+  if (!Array.isArray(data.output)) {
+    return "";
+  }
+
+  return data.output
+    .flatMap((item) => item.content || [])
+    .map((content) => content.text || "")
+    .filter(Boolean)
+    .join("\n\n")
+    .trim();
+}
