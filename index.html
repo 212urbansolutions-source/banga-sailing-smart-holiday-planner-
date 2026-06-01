@@ -24,6 +24,7 @@
       <nav class="nav-links" aria-label="Main">
         <a href="#planner">Planner</a>
         <a href="#charters">Yachts</a>
+        <a href="#boat-finder">Boat Finder</a>
         <a href="#moments">Moments</a>
         <a href="#local">Local</a>
         <a href="#events">Events</a>
@@ -97,7 +98,7 @@
               <fieldset class="segmented" aria-label="Trip mood">
                 <legend>Trip mood</legend>
                 <label><input type="radio" name="mood" value="balanced" checked /> Balanced</label>
-                <label><input type="radio" name="mood" value="quiet" /> Quiet coves</label>
+                <label><input type="radio" name="mood" value="kids" /> With kids</label>
                 <label><input type="radio" name="mood" value="culture" /> Culture</label>
               </fieldset>
 
@@ -132,6 +133,97 @@
         <span>Local food</span>
         <span>Wine & seafood</span>
         <span>Cultural stops</span>
+      </section>
+
+      <section class="finder-section" id="boat-finder" aria-labelledby="finder-title">
+        <div class="finder-head">
+          <div>
+            <p class="eyebrow">Charter marketplace</p>
+            <h2 id="finder-title">Find the right boat for the route</h2>
+          </div>
+          <p>
+            A broker-ready search layer for weekly charters, skippered holidays, catamarans,
+            sailing yachts, motor yachts, and day boats. Later this can read live inventory
+            from broker APIs.
+          </p>
+        </div>
+
+        <form class="finder-search" id="boatFinderForm">
+          <label>
+            Destination
+            <select name="finderRegion" id="finderRegion">
+              <option value="all">Any destination</option>
+              <option value="greece-ionian">Greece, Ionian Sea</option>
+              <option value="greece-saronic">Greece, Saronic Gulf</option>
+              <option value="croatia-dalmatia">Croatia, Dalmatian Coast</option>
+              <option value="turkey-lycian">Turkey, Lycian Coast</option>
+              <option value="italy-amalfi">Italy, Amalfi & Capri</option>
+            </select>
+          </label>
+          <label>
+            Date
+            <input name="finderDate" type="date" />
+          </label>
+          <label>
+            Guests
+            <input name="finderGuests" type="number" min="2" max="14" value="6" />
+          </label>
+          <label>
+            Boat type
+            <select name="finderType" id="finderType">
+              <option value="all">All boats</option>
+              <option value="catamaran">Catamaran</option>
+              <option value="sailing">Sailing yacht</option>
+              <option value="motor">Motor yacht</option>
+              <option value="powerboat">Powerboat</option>
+            </select>
+          </label>
+          <button class="button primary" type="submit">Search boats</button>
+        </form>
+
+        <div class="finder-layout">
+          <aside class="finder-filters" aria-label="Boat filters">
+            <div class="filter-block">
+              <h3>Budget</h3>
+              <label>
+                Max weekly price
+                <input id="priceFilter" type="range" min="3000" max="16000" step="500" value="12000" />
+              </label>
+              <output id="priceOutput">Up to EUR 12,000</output>
+            </div>
+            <div class="filter-block">
+              <h3>Comfort</h3>
+              <label class="check-row"><input id="skipperFilter" type="checkbox" /> Skipper available</label>
+              <label class="check-row"><input id="acFilter" type="checkbox" /> Air conditioning</label>
+              <label class="check-row"><input id="waterToysFilter" type="checkbox" /> Water toys</label>
+            </div>
+            <div class="filter-block">
+              <h3>Cabins</h3>
+              <select id="cabinsFilter">
+                <option value="0">Any cabins</option>
+                <option value="3">3+ cabins</option>
+                <option value="4">4+ cabins</option>
+                <option value="5">5+ cabins</option>
+              </select>
+            </div>
+          </aside>
+
+          <div class="finder-results-wrap">
+            <div class="finder-toolbar">
+              <span id="boatResultCount">6 boats found</span>
+              <label>
+                Sort
+                <select id="sortBoats">
+                  <option value="recommended">Recommended</option>
+                  <option value="price">Lowest price</option>
+                  <option value="rating">Highest rating</option>
+                  <option value="year">Newest</option>
+                </select>
+              </label>
+            </div>
+            <div class="boat-results" id="boatResults" aria-live="polite"></div>
+          </div>
+        </div>
       </section>
 
       <section class="section" id="charters">
