@@ -95,7 +95,8 @@ const boatInventory = [
     ac: true,
     waterToys: true,
     badge: "Family favorite",
-    image: "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&fit=crop&w=900&q=82",
+    image: "https://cloud.yatco.com/ForSale/Vessel/Photo/443725/small_4607406.jpg",
+    fallbackImage: "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&fit=crop&w=900&q=82",
     note: "Stable catamaran for Ionian swim stops, Paxos bays, and relaxed island dinners.",
   },
   {
@@ -114,7 +115,8 @@ const boatInventory = [
     ac: false,
     waterToys: false,
     badge: "Best value",
-    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=82",
+    image: "https://www.beneteau.com/sites/default/files/styles/standard_large/public/oceanis45_0076formatok.jpg.webp?itok=lYno3Zn2",
+    fallbackImage: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=82",
     note: "Classic sailing yacht for Hydra, Poros, Aegina, and sheltered Saronic passages.",
   },
   {
@@ -133,7 +135,8 @@ const boatInventory = [
     ac: true,
     waterToys: true,
     badge: "New season",
-    image: "https://images.unsplash.com/photo-1515238152791-8216bfdf89a7?auto=format&fit=crop&w=900&q=82",
+    image: "https://www.bali-catamarans.com/_next/image?q=75&url=https%3A%2F%2Fbrave-car-d225abcbfb.media.strapiapp.com%2FEN_Cover_4_6_70994bf2f8.png&w=1920",
+    fallbackImage: "https://images.unsplash.com/photo-1515238152791-8216bfdf89a7?auto=format&fit=crop&w=900&q=82",
     note: "Wide living space for Hvar, Vis, Korcula, wine stops, and blue-water swims.",
   },
   {
@@ -152,12 +155,13 @@ const boatInventory = [
     ac: true,
     waterToys: true,
     badge: "Fast coastal hops",
-    image: "https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&fit=crop&w=900&q=82",
+    image: "https://www.devalk.nl/images/thumbnails/website/azimut-52-57229_2e.jpg",
+    fallbackImage: "https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&fit=crop&w=900&q=82",
     note: "Comfortable motor yacht for Gocek islands, Fethiye, beach clubs, and short passages.",
   },
   {
     id: "power-amalfi-34",
-    name: "Itama 34 Amalfi Day",
+    name: "Itama 38 Capri Day",
     type: "powerboat",
     region: "italy-amalfi",
     base: "Naples",
@@ -166,17 +170,18 @@ const boatInventory = [
     year: 2019,
     cabins: 1,
     berths: 2,
-    length: "10.5 m",
+    length: "11.6 m",
     skipper: true,
     ac: false,
     waterToys: true,
     badge: "Day charter",
-    image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=900&q=82",
+    image: "https://frg-fwm.azurewebsites.net/asset/fwm/Upload/Models/Images/PhotoGallery/Itama/Webp/95242.webp",
+    fallbackImage: "https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&fit=crop&w=900&q=82",
     note: "Powerboat for Capri, Positano, swim stops, and lunch reservations ashore.",
   },
   {
     id: "cat-cyclades-40",
-    name: "Fountaine Pajot 40",
+    name: "Fountaine Pajot FP41",
     type: "catamaran",
     region: "greece-cyclades",
     base: "Lavrion",
@@ -185,12 +190,13 @@ const boatInventory = [
     year: 2021,
     cabins: 4,
     berths: 8,
-    length: "11.7 m",
+    length: "12.1 m",
     skipper: true,
     ac: true,
     waterToys: false,
     badge: "Cyclades ready",
-    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=82",
+    image: "https://www.catamarans-fountaine-pajot.com/wp-content/uploads/sites/3/2025/06/Template-photo-header-SC-FP41-min-scaled.jpg",
+    fallbackImage: "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&fit=crop&w=900&q=82",
     note: "Compact catamaran for Kythnos, Serifos, Syros, and flexible wind-aware routing.",
   },
 ];
@@ -323,7 +329,11 @@ function renderBoatCard(boat) {
 
   return `
     <article class="boat-card" data-boat-id="${boat.id}">
-      <img src="${boat.image}" alt="${escapeHtml(boat.name)} charter boat" />
+      <img
+        src="${escapeHtml(boat.image)}"
+        alt="${escapeHtml(boat.name)} charter boat"
+        onerror="this.onerror=null;this.src='${escapeHtml(boat.fallbackImage || boat.image)}';"
+      />
       <div class="boat-card-body">
         <div class="boat-card-top">
           <div>

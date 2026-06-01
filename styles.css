@@ -1121,6 +1121,17 @@ h2 {
     position: absolute;
   }
 
+  .hero {
+    background-position:
+      center,
+      54% 84%,
+      center 70%;
+    background-size:
+      cover,
+      auto 160%,
+      cover;
+  }
+
   .nav-links {
     display: none;
   }
