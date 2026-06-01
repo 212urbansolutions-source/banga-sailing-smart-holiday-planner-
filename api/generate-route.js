@@ -72,7 +72,9 @@ Return only this JSON shape:
       "day": 1,
       "name": "Starting marina or destination",
       "type": "marina | anchorage | swim stop | town | bay",
-      "note": "Very short note"
+      "note": "Very short note",
+      "lat": 37.9838,
+      "lng": 23.7275
     }
   ],
   "itinerary": [
@@ -88,8 +90,8 @@ Return only this JSON shape:
 Rules:
 - Include 5 to 8 route stops.
 - First stop must be ${start}.
+- Each stop must include approximate decimal coordinates as lat and lng.
 - Keep text client-friendly.
-- Do not include coordinates.
 - Do not exceed 700 words total.`,
           },
         ],
