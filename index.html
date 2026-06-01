@@ -55,13 +55,21 @@
 
             <form class="planner-form" id="routeForm">
               <label>
-                Destination
-                <select name="destination">
-                  <option value="croatia">Croatia, Dalmatian Coast</option>
-                  <option value="greece">Greece, Ionian Islands</option>
-                  <option value="italy">Italy, Amalfi & Capri</option>
+                Region
+                <select name="region" id="regionSelect">
+                  <option value="croatia-dalmatia">Croatia, Dalmatian Coast</option>
+                  <option value="greece-ionian">Greece, Ionian Sea</option>
+                  <option value="greece-saronic">Greece, Saronic Gulf</option>
+                  <option value="greece-cyclades">Greece, Cyclades</option>
+                  <option value="turkey-lycian">Turkey, Lycian Coast</option>
+                  <option value="italy-amalfi">Italy, Amalfi & Capri</option>
                   <option value="bvi">British Virgin Islands</option>
                 </select>
+              </label>
+
+              <label>
+                Starting point
+                <select name="start" id="startSelect"></select>
               </label>
 
               <div class="field-grid">

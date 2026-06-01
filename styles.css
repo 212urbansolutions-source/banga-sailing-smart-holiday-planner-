@@ -321,7 +321,7 @@ textarea {
   margin-top: 16px;
 }
 
-.route-output div {
+.route-output > div {
   min-height: 84px;
   border-radius: 8px;
   padding: 12px;
@@ -337,6 +337,85 @@ textarea {
   margin: 8px 0 0;
   color: var(--muted);
   line-height: 1.55;
+}
+
+.mini-route-map {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.9fr) minmax(0, 1fr);
+  gap: 14px;
+  align-items: stretch;
+  margin: 12px 0 16px;
+}
+
+.mini-route-map svg {
+  width: 100%;
+  min-height: 190px;
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 78% 18%, rgba(255, 211, 61, 0.5), transparent 18%),
+    linear-gradient(135deg, #60e6ed, #009bb1 52%, #006f82);
+}
+
+.map-waterline {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.5);
+  stroke-linecap: round;
+  stroke-width: 1.1;
+}
+
+.map-route {
+  fill: none;
+  stroke: #fff7ce;
+  stroke-dasharray: 2.4 2.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+}
+
+.map-stop circle {
+  fill: var(--gold);
+  stroke: var(--white);
+  stroke-width: 0.9;
+}
+
+.map-stop text {
+  fill: var(--white);
+  font-size: 4px;
+  font-weight: 900;
+  text-anchor: middle;
+}
+
+.mini-route-stops {
+  display: grid;
+  gap: 8px;
+  max-height: 230px;
+  margin: 0;
+  overflow: auto;
+  padding: 0;
+  list-style: none;
+}
+
+.mini-route-stops li {
+  border: 1px solid rgba(0, 155, 177, 0.18);
+  border-radius: 8px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.mini-route-stops strong,
+.mini-route-stops span {
+  display: block;
+}
+
+.mini-route-stops strong {
+  margin-bottom: 4px;
+  color: var(--ink);
+}
+
+.mini-route-stops span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.35;
 }
 
 .route-error {
@@ -846,6 +925,7 @@ h2 {
 
   .field-grid,
   .route-output,
+  .mini-route-map,
   .segmented {
     grid-template-columns: 1fr;
   }
