@@ -58,6 +58,7 @@ Include:
 - Day-by-day itinerary
 - Suggested marinas or anchorages
 - Swimming stops
+- Family-friendly pacing, short passages, safe swim stops, and kid-friendly food if trip mood is with kids
 - Food, wine, seafood, and local culture ideas
 - Provisioning notes
 - Weather assumptions
