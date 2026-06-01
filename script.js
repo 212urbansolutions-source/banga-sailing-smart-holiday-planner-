@@ -200,8 +200,10 @@ function updateStartPoints() {
   startSelect.innerHTML = points.map((point) => `<option value="${point}">${point}</option>`).join("");
 }
 
-regionSelect.addEventListener("change", updateStartPoints);
-updateStartPoints();
+if (regionSelect && startSelect) {
+  regionSelect.addEventListener("change", updateStartPoints);
+  updateStartPoints();
+}
 
 if (boatFinderForm) {
   boatFinderForm.addEventListener("submit", (event) => {
@@ -210,39 +212,52 @@ if (boatFinderForm) {
   });
 
   [priceFilter, skipperFilter, acFilter, waterToysFilter, cabinsFilter, sortBoats, mobileSortBoats].forEach((control) => {
+    if (!control) {
+      return;
+    }
     control.addEventListener("input", renderBoatResults);
     control.addEventListener("change", renderBoatResults);
   });
 
-  openFilters.addEventListener("click", () => {
+  openFilters?.addEventListener("click", () => {
     document.body.classList.add("filters-open");
   });
 
-  closeFilters.addEventListener("click", () => {
+  closeFilters?.addEventListener("click", () => {
     document.body.classList.remove("filters-open");
   });
 
-  mobileSortBoats.addEventListener("change", () => {
-    sortBoats.value = mobileSortBoats.value;
+  mobileSortBoats?.addEventListener("change", () => {
+    if (sortBoats) {
+      sortBoats.value = mobileSortBoats.value;
+    }
   });
 
-  sortBoats.addEventListener("change", () => {
-    mobileSortBoats.value = sortBoats.value;
+  sortBoats?.addEventListener("change", () => {
+    if (mobileSortBoats) {
+      mobileSortBoats.value = sortBoats.value;
+    }
   });
 
   renderBoatResults();
 }
 
 function renderBoatResults() {
+  if (!boatFinderForm || !boatResults || !boatResultCount) {
+    return;
+  }
+
   const formData = new FormData(boatFinderForm);
   const region = formData.get("finderRegion");
   const type = formData.get("finderType");
   const guests = Number(formData.get("finderGuests")) || 0;
-  const maxPrice = Number(priceFilter.value);
-  const minCabins = Number(cabinsFilter.value);
-  const sort = sortBoats.value;
+  const maxPrice = Number(priceFilter?.value) || 16000;
+  const minCabins = Number(cabinsFilter?.value) || 0;
+  const sort = sortBoats?.value || mobileSortBoats?.value || "recommended";
 
-  priceOutput.textContent = `Up to EUR ${maxPrice.toLocaleString("en-US")}`;
+  if (priceOutput) {
+    priceOutput.textContent = `Up to EUR ${maxPrice.toLocaleString("en-US")}`;
+  }
 
   let results = boatInventory.filter((boat) => {
     const matchesRegion = region === "all" || boat.region === region;
@@ -250,9 +265,9 @@ function renderBoatResults() {
     const matchesGuests = !guests || boat.berths >= guests;
     const matchesPrice = boat.price <= maxPrice;
     const matchesCabins = !minCabins || boat.cabins >= minCabins;
-    const matchesSkipper = !skipperFilter.checked || boat.skipper;
-    const matchesAc = !acFilter.checked || boat.ac;
-    const matchesWaterToys = !waterToysFilter.checked || boat.waterToys;
+    const matchesSkipper = !skipperFilter?.checked || boat.skipper;
+    const matchesAc = !acFilter?.checked || boat.ac;
+    const matchesWaterToys = !waterToysFilter?.checked || boat.waterToys;
 
     return (
       matchesRegion &&
@@ -314,7 +329,7 @@ function renderBoatCard(boat) {
           <div>
             <span class="boat-badge">${escapeHtml(boat.badge)}</span>
             <h3>${escapeHtml(boat.name)}</h3>
-            <div class="boat-location">${escapeHtml(boat.base)} · ${formatRegionName(boat.region)} · Rating ${boat.rating}</div>
+            <div class="boat-location">${escapeHtml(boat.base)} | ${formatRegionName(boat.region)} | Rating ${boat.rating}</div>
           </div>
           <div class="boat-price">
             <strong>EUR ${boat.price.toLocaleString("en-US")}</strong>
