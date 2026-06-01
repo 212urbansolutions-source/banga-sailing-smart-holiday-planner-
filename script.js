@@ -76,8 +76,14 @@ routeForm.addEventListener("submit", (event) => {
         </div>
       `;
     })
-    .catch(() => {
-      renderFallbackPreview({ route, guests, days, focus, vesselPlan });
+    .catch((error) => {
+      routeOutput.innerHTML = `
+        <div class="ai-preview route-error">
+          <span class="metric">AI preview unavailable</span>
+          <p>${formatPreview(error.message)}</p>
+          <small>Check the Vercel function and OPENAI_API_KEY setup.</small>
+        </div>
+      `;
     });
 });
 
@@ -88,7 +94,14 @@ async function generateAiPreview(routeRequest) {
     body: JSON.stringify(routeRequest),
   });
 
-  const result = await response.json();
+  const text = await response.text();
+  let result;
+
+  try {
+    result = JSON.parse(text);
+  } catch {
+    throw new Error(`API did not return JSON. Status ${response.status}.`);
+  }
 
   if (!response.ok) {
     throw new Error(result.error || "Could not generate route preview.");

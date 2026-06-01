@@ -1,15 +1,26 @@
-export default async function handler(request, response) {
+module.exports = async function handler(request, response) {
+  response.setHeader("Access-Control-Allow-Origin", "*");
+  response.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  response.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (request.method === "OPTIONS") {
+    return response.status(204).end();
+  }
+
   if (request.method !== "POST") {
-    return response.status(405).json({ error: "Method not allowed" });
+    return response.status(405).json({ error: "Method not allowed. Use POST." });
   }
 
   if (!process.env.OPENAI_API_KEY) {
     return response.status(500).json({
-      error: "Missing OPENAI_API_KEY environment variable.",
+      error: "Missing OPENAI_API_KEY in Vercel Environment Variables.",
     });
   }
 
-  const { destination, guests, days, mood, vessel } = request.body || {};
+  const body =
+    typeof request.body === "string" ? JSON.parse(request.body || "{}") : request.body || {};
+
+  const { destination, guests, days, mood, vessel } = body;
 
   if (!destination || !guests || !days || !mood || !vessel) {
     return response.status(400).json({
@@ -71,7 +82,7 @@ Keep it client-friendly and no more than 700 words.`,
     });
   } catch (error) {
     return response.status(500).json({
-      error: "Could not generate route preview.",
+      error: error.message || "Could not generate route preview.",
     });
   }
-}
+};

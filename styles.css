@@ -339,6 +339,11 @@ textarea {
   line-height: 1.55;
 }
 
+.route-error {
+  border: 1px solid rgba(180, 53, 35, 0.26);
+  background: #fff4e0;
+}
+
 .metric {
   display: block;
   margin-bottom: 6px;
