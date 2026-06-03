@@ -1116,6 +1116,229 @@ h2 {
   background: var(--night);
 }
 
+.boat-detail-page {
+  background: #f4fbf9;
+}
+
+.detail-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px clamp(18px, 4vw, 56px);
+  background: rgba(244, 251, 249, 0.92);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(14px);
+}
+
+.detail-brand {
+  color: var(--ink);
+}
+
+.boat-detail {
+  display: grid;
+  gap: 42px;
+  width: calc(100% - 36px);
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 34px 0 70px;
+}
+
+.detail-loading {
+  display: grid;
+  min-height: 58vh;
+  align-content: center;
+  gap: 16px;
+}
+
+.detail-loading h1 {
+  max-width: 760px;
+  font-size: clamp(2.6rem, 7vw, 5.6rem);
+  line-height: 0.92;
+}
+
+.boat-hero-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(340px, 0.65fr);
+  gap: 28px;
+  align-items: stretch;
+}
+
+.boat-hero-media {
+  overflow: hidden;
+  min-height: 520px;
+  border-radius: 8px;
+  background: #dff6f2;
+}
+
+.boat-hero-media img,
+.boat-gallery img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.boat-summary-panel,
+.detail-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--white);
+  box-shadow: 0 18px 54px rgba(0, 91, 111, 0.14);
+}
+
+.boat-summary-panel {
+  display: grid;
+  align-content: end;
+  gap: 18px;
+  padding: 28px;
+}
+
+.boat-summary-panel h1 {
+  margin-bottom: 0;
+  font-size: clamp(2.6rem, 6vw, 5.2rem);
+  line-height: 0.92;
+}
+
+.detail-subtitle {
+  color: var(--muted);
+}
+
+.detail-price {
+  display: grid;
+  gap: 4px;
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.detail-price strong {
+  color: var(--sea);
+  font-size: 2rem;
+}
+
+.detail-mini-specs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 0;
+}
+
+.detail-mini-specs div {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #ecfbf8;
+}
+
+.detail-mini-specs dt {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.detail-mini-specs dd {
+  margin: 0;
+  font-weight: 900;
+}
+
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.detail-section {
+  display: grid;
+  gap: 18px;
+}
+
+.detail-section h2 {
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 1;
+}
+
+.detail-grid-section {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  align-items: start;
+}
+
+.spec-table {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--line);
+}
+
+.spec-table div {
+  display: grid;
+  gap: 8px;
+  min-height: 92px;
+  padding: 18px;
+  background: var(--white);
+}
+
+.spec-table span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.spec-table strong {
+  font-size: 1.1rem;
+}
+
+.detail-card {
+  display: grid;
+  gap: 10px;
+  padding: 22px;
+}
+
+.detail-card h3 {
+  margin: 0;
+}
+
+.boat-gallery {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 12px;
+}
+
+.boat-gallery img {
+  min-height: 220px;
+  border-radius: 8px;
+  background: #dff6f2;
+}
+
+.boat-gallery img:first-child {
+  grid-row: span 2;
+  min-height: 452px;
+}
+
+.detail-feature-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding: 0;
+  list-style: none;
+}
+
+.detail-feature-list li {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px 16px;
+  background: var(--white);
+  font-weight: 800;
+}
+
 @media (max-width: 900px) {
   .site-header {
     position: absolute;
@@ -1139,6 +1362,8 @@ h2 {
   .hero-inner,
   .section-head,
   .yacht-grid,
+  .boat-hero-detail,
+  .detail-grid-section,
   .finder-head,
   .finder-search,
   .finder-layout,
@@ -1256,6 +1481,22 @@ h2 {
 
   .events-copy {
     padding: 6px;
+  }
+
+  .boat-hero-media {
+    min-height: 360px;
+  }
+
+  .detail-mini-specs,
+  .spec-table,
+  .boat-gallery,
+  .detail-feature-list {
+    grid-template-columns: 1fr;
+  }
+
+  .boat-gallery img:first-child {
+    grid-row: auto;
+    min-height: 260px;
   }
 }
 

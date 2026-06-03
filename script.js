@@ -408,6 +408,7 @@ function renderBoatCard(boat) {
     boat.ac ? "A/C" : "Natural ventilation",
     boat.waterToys ? "Water toys" : "Swim ladder",
   ];
+  const detailUrl = buildBoatDetailUrl(boat);
 
   return `
     <article class="boat-card" data-boat-id="${boat.id}">
@@ -441,11 +442,24 @@ function renderBoatCard(boat) {
         </ul>
         <div class="boat-card-actions">
           <small>${boat.source === "nausys" ? `Live NAUSYS record ${escapeHtml(String(boat.nausysYachtId || ""))}` : "API-ready card: replace mock data with broker availability later."}</small>
-          <button class="button light" type="button">Check availability</button>
+          <a class="button light" href="${escapeHtml(detailUrl)}">Open boat page</a>
         </div>
       </div>
     </article>
   `;
+}
+
+function buildBoatDetailUrl(boat) {
+  const params = new URLSearchParams();
+  params.set("id", boat.nausysYachtId || boat.id);
+  params.set("source", boat.source || "demo");
+
+  if (boat.periodFrom) params.set("dateFrom", boat.periodFrom);
+  if (boat.periodTo) params.set("dateTo", boat.periodTo);
+  if (boat.price) params.set("price", String(boat.price));
+  if (boat.currency) params.set("currency", boat.currency);
+
+  return `boat.html?${params.toString()}`;
 }
 
 function formatRegionName(region) {
