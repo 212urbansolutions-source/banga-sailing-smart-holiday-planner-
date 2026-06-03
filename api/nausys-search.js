@@ -176,6 +176,8 @@ function normalizeFreeYacht(item, selectedRegion, selectedType) {
     badge: "NAUSYS live",
     image: cleanImageUrl(details.mainPictureUrl) || pictureFromList(details) || imageFromId(yachtId),
     fallbackImage: FALLBACK_IMAGE,
+    periodFrom: item.periodFrom || "",
+    periodTo: item.periodTo || "",
     note: `Available ${item.periodFrom || ""} to ${item.periodTo || ""}. Real NAUSYS ID ${yachtId || "pending"}.`,
     source: "nausys",
   };
