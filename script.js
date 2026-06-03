@@ -260,7 +260,7 @@ async function loadNausysBoatResults() {
 
   const formData = new FormData(boatFinderForm);
   const maxPrice = Number(priceFilter?.value) || 16000;
-  const minCabins = Number(cabinsFilter?.value) || 0;
+  const minCabins = Math.max(Number(formData.get("finderCabins")) || 0, Number(cabinsFilter?.value) || 0);
   const sort = sortBoats?.value || mobileSortBoats?.value || "recommended";
 
   boatResultCount.textContent = "Searching NAUSYS live inventory...";
@@ -277,7 +277,7 @@ async function loadNausysBoatResults() {
       body: JSON.stringify({
         finderRegion: formData.get("finderRegion"),
         finderDate: formData.get("finderDate"),
-        finderGuests: formData.get("finderGuests"),
+        finderCabins: formData.get("finderCabins"),
         finderType: formData.get("finderType"),
         maxPrice,
         minCabins,
@@ -291,13 +291,14 @@ async function loadNausysBoatResults() {
       throw new Error(data.error || "NAUSYS live search is not available yet.");
     }
 
-    activeBoatInventory = Array.isArray(data.boats) && data.boats.length ? data.boats : boatInventory;
-    boatInventorySource = Array.isArray(data.boats) && data.boats.length ? "nausys" : "demo";
+    activeBoatInventory = Array.isArray(data.boats) ? data.boats : [];
+    boatInventorySource = "nausys";
     renderBoatResults({
-      sourceLabel:
-        boatInventorySource === "nausys"
-          ? `NAUSYS live: ${data.totalCount || data.boats.length} available`
-          : "Demo boats shown",
+      sourceLabel: `NAUSYS live: ${data.totalCount || 0} available`,
+      notice:
+        Array.isArray(data.boats) && data.boats.length
+          ? ""
+          : "NAUSYS returned no live yachts for this exact search. Try a different date, wider budget, or fewer filters.",
     });
   } catch (error) {
     activeBoatInventory = boatInventory;
@@ -335,9 +336,8 @@ function renderBoatResults(options = {}) {
   const formData = new FormData(boatFinderForm);
   const region = formData.get("finderRegion");
   const type = formData.get("finderType");
-  const guests = Number(formData.get("finderGuests")) || 0;
   const maxPrice = Number(priceFilter?.value) || 16000;
-  const minCabins = Number(cabinsFilter?.value) || 0;
+  const minCabins = Math.max(Number(formData.get("finderCabins")) || 0, Number(cabinsFilter?.value) || 0);
   const sort = sortBoats?.value || mobileSortBoats?.value || "recommended";
 
   if (priceOutput) {
@@ -347,9 +347,8 @@ function renderBoatResults(options = {}) {
   let results = activeBoatInventory.filter((boat) => {
     const matchesRegion = region === "all" || boat.region === region;
     const matchesType = type === "all" || boat.type === type;
-    const matchesGuests = !guests || boat.berths >= guests;
     const matchesPrice = boat.price <= maxPrice;
-    const matchesCabins = !minCabins || boat.cabins >= minCabins;
+    const matchesCabins = !minCabins || boat.cabins >= minCabins || (boat.source === "nausys" && !boat.cabins);
     const matchesSkipper = !skipperFilter?.checked || boat.skipper;
     const matchesAc = !acFilter?.checked || boat.ac;
     const matchesWaterToys = !waterToysFilter?.checked || boat.waterToys;
@@ -357,7 +356,6 @@ function renderBoatResults(options = {}) {
     return (
       matchesRegion &&
       matchesType &&
-      matchesGuests &&
       matchesPrice &&
       matchesCabins &&
       matchesSkipper &&
@@ -374,7 +372,7 @@ function renderBoatResults(options = {}) {
   if (!results.length) {
     boatResults.innerHTML = `
       <div class="boat-empty">
-        No boats match these filters yet. Try wider dates, destination, budget, or boat type.
+        ${escapeHtml(options.notice || "No boats match these filters yet. Try wider dates, destination, budget, or boat type.")}
       </div>
     `;
     return;

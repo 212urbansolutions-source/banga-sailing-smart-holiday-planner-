@@ -97,17 +97,12 @@ function buildNausysSearch(body, username, password) {
     request.yachtCategories = categoryIds;
   }
 
-  const guests = Number(body.finderGuests);
-  if (guests) {
-    request.persons = [guests];
-  }
-
   const priceTo = Number(body.maxPrice);
   if (priceTo) {
     request.priceTo = priceTo;
   }
 
-  const cabins = Number(body.minCabins);
+  const cabins = Number(body.finderCabins || body.minCabins);
   if (cabins) {
     request.cabins = [cabins];
   }
