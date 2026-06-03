@@ -16,6 +16,9 @@ const mobileSortBoats = document.querySelector("#mobileSortBoats");
 const openFilters = document.querySelector("#openFilters");
 const closeFilters = document.querySelector("#closeFilters");
 
+let activeBoatInventory = [];
+let boatInventorySource = "demo";
+
 const routeData = {
   "croatia-dalmatia": {
     wind: "12-18 kn",
@@ -201,6 +204,8 @@ const boatInventory = [
   },
 ];
 
+activeBoatInventory = boatInventory;
+
 function updateStartPoints() {
   const points = startPoints[regionSelect.value] || [];
   startSelect.innerHTML = points.map((point) => `<option value="${point}">${point}</option>`).join("");
@@ -212,9 +217,9 @@ if (regionSelect && startSelect) {
 }
 
 if (boatFinderForm) {
-  boatFinderForm.addEventListener("submit", (event) => {
+  boatFinderForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    renderBoatResults();
+    await loadNausysBoatResults();
   });
 
   [priceFilter, skipperFilter, acFilter, waterToysFilter, cabinsFilter, sortBoats, mobileSortBoats].forEach((control) => {
@@ -248,7 +253,81 @@ if (boatFinderForm) {
   renderBoatResults();
 }
 
-function renderBoatResults() {
+async function loadNausysBoatResults() {
+  if (!boatFinderForm || !boatResults || !boatResultCount) {
+    return;
+  }
+
+  const formData = new FormData(boatFinderForm);
+  const maxPrice = Number(priceFilter?.value) || 16000;
+  const minCabins = Number(cabinsFilter?.value) || 0;
+  const sort = sortBoats?.value || mobileSortBoats?.value || "recommended";
+
+  boatResultCount.textContent = "Searching NAUSYS live inventory...";
+  boatResults.innerHTML = `
+    <div class="boat-empty">
+      Connecting to NAUSYS and checking real charter availability.
+    </div>
+  `;
+
+  try {
+    const response = await fetch("/api/nausys-search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        finderRegion: formData.get("finderRegion"),
+        finderDate: formData.get("finderDate"),
+        finderGuests: formData.get("finderGuests"),
+        finderType: formData.get("finderType"),
+        maxPrice,
+        minCabins,
+        sort,
+      }),
+    });
+
+    const data = await readJsonResponse(response);
+
+    if (!response.ok) {
+      throw new Error(data.error || "NAUSYS live search is not available yet.");
+    }
+
+    activeBoatInventory = Array.isArray(data.boats) && data.boats.length ? data.boats : boatInventory;
+    boatInventorySource = Array.isArray(data.boats) && data.boats.length ? "nausys" : "demo";
+    renderBoatResults({
+      sourceLabel:
+        boatInventorySource === "nausys"
+          ? `NAUSYS live: ${data.totalCount || data.boats.length} available`
+          : "Demo boats shown",
+    });
+  } catch (error) {
+    activeBoatInventory = boatInventory;
+    boatInventorySource = "demo";
+    renderBoatResults({
+      notice: `${cleanApiError(error.message)} Showing demo boats until NAUSYS credentials/API access are configured.`,
+    });
+  }
+}
+
+async function readJsonResponse(response) {
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    return {
+      error: response.ok ? "NAUSYS response was not valid JSON." : "NAUSYS live search is not available yet.",
+    };
+  }
+}
+
+function cleanApiError(message) {
+  if (!message || message.includes("Unexpected token") || message.includes("Not found")) {
+    return "NAUSYS live search is not available yet.";
+  }
+
+  return message;
+}
+
+function renderBoatResults(options = {}) {
   if (!boatFinderForm || !boatResults || !boatResultCount) {
     return;
   }
@@ -265,7 +344,7 @@ function renderBoatResults() {
     priceOutput.textContent = `Up to EUR ${maxPrice.toLocaleString("en-US")}`;
   }
 
-  let results = boatInventory.filter((boat) => {
+  let results = activeBoatInventory.filter((boat) => {
     const matchesRegion = region === "all" || boat.region === region;
     const matchesType = type === "all" || boat.type === type;
     const matchesGuests = !guests || boat.berths >= guests;
@@ -288,18 +367,23 @@ function renderBoatResults() {
   });
 
   results = sortBoatResults(results, sort);
-  boatResultCount.textContent = `${results.length} ${results.length === 1 ? "boat" : "boats"} found`;
+  const sourceLabel =
+    options.sourceLabel || (boatInventorySource === "nausys" ? "NAUSYS live" : "Demo inventory");
+  boatResultCount.textContent = `${results.length} ${results.length === 1 ? "boat" : "boats"} found | ${sourceLabel}`;
 
   if (!results.length) {
     boatResults.innerHTML = `
       <div class="boat-empty">
-        No boats match these filters yet. Later, broker API results can expand this inventory automatically.
+        No boats match these filters yet. Try wider dates, destination, budget, or boat type.
       </div>
     `;
     return;
   }
 
-  boatResults.innerHTML = results.map(renderBoatCard).join("");
+  const notice = options.notice
+    ? `<div class="boat-empty">${escapeHtml(options.notice)}</div>`
+    : "";
+  boatResults.innerHTML = `${notice}${results.map(renderBoatCard).join("")}`;
 }
 
 function sortBoatResults(results, sort) {
@@ -342,23 +426,23 @@ function renderBoatCard(boat) {
             <div class="boat-location">${escapeHtml(boat.base)} | ${formatRegionName(boat.region)} | Rating ${boat.rating}</div>
           </div>
           <div class="boat-price">
-            <strong>EUR ${boat.price.toLocaleString("en-US")}</strong>
+            <strong>${formatBoatPrice(boat)}</strong>
             <span>per week from</span>
           </div>
         </div>
         <ul class="boat-specs">
           <li>${escapeHtml(formatBoatType(boat.type))}</li>
-          <li>${boat.cabins} cabins</li>
-          <li>${boat.berths} guests</li>
-          <li>${boat.length}</li>
-          <li>${boat.year}</li>
+          <li>${boat.cabins || "?"} cabins</li>
+          <li>${boat.berths || "?"} guests</li>
+          <li>${escapeHtml(boat.length || "Length on request")}</li>
+          <li>${boat.year || "Year on request"}</li>
         </ul>
         <p>${escapeHtml(boat.note)}</p>
         <ul class="boat-includes">
           ${includes.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
         </ul>
         <div class="boat-card-actions">
-          <small>API-ready card: replace mock data with broker availability later.</small>
+          <small>${boat.source === "nausys" ? `Live NAUSYS record ${escapeHtml(String(boat.nausysYachtId || ""))}` : "API-ready card: replace mock data with broker availability later."}</small>
           <button class="button light" type="button">Check availability</button>
         </div>
       </div>
@@ -374,10 +458,17 @@ function formatRegionName(region) {
     "greece-cyclades": "Greece, Cyclades",
     "turkey-lycian": "Turkey, Lycian Coast",
     "italy-amalfi": "Italy, Amalfi",
+    "nausys-live": "NAUSYS live inventory",
     bvi: "British Virgin Islands",
   };
 
   return names[region] || region;
+}
+
+function formatBoatPrice(boat) {
+  const currency = boat.currency || "EUR";
+  const price = Number(boat.price);
+  return price ? `${currency} ${price.toLocaleString("en-US")}` : "Price on request";
 }
 
 function formatBoatType(type) {
