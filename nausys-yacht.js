@@ -1,3 +1,13 @@
+const NAUSYS_BASE_URL = "https://ws.nausys.com/CBMS-external/rest";
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&fit=crop&w=900&q=82";
+
+const YACHT_CATEGORY_BY_TYPE = {
+  catamaran: [51],
+  sailing: [1],
+  motor: [101],
+};
+
 module.exports = async function handler(request, response) {
   response.setHeader("Access-Control-Allow-Origin", "*");
   response.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -11,188 +21,208 @@ module.exports = async function handler(request, response) {
     return response.status(405).json({ error: "Method not allowed. Use POST." });
   }
 
-  if (!process.env.OPENAI_API_KEY) {
+  const username = process.env.NAUSYS_USERNAME;
+  const password = process.env.NAUSYS_PASSWORD;
+
+  if (!username || !password) {
     return response.status(500).json({
-      error: "Missing OPENAI_API_KEY in Vercel Environment Variables.",
-    });
-  }
-
-  const body =
-    typeof request.body === "string" ? JSON.parse(request.body || "{}") : request.body || {};
-
-  const { region, start, guests, days, mood, vessel } = body;
-
-  if (!region || !start || !guests || !days || !mood || !vessel) {
-    return response.status(400).json({
-      error: "Missing required route planning details.",
+      error: "Missing NAUSYS_USERNAME or NAUSYS_PASSWORD in Vercel Environment Variables.",
+      fallback: true,
     });
   }
 
   try {
-    const openaiResponse = await fetch("https://api.openai.com/v1/responses", {
+    const body =
+      typeof request.body === "string" ? JSON.parse(request.body || "{}") : request.body || {};
+    const search = buildNausysSearch(body, username, password);
+    const nausysResponse = await fetch(`${NAUSYS_BASE_URL}/yachtReservation/v6/freeYachtsSearch`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4.1-mini",
-        input: [
-          {
-            role: "system",
-            content:
-              "You are an expert yacht charter planner. Create concise, practical sailing holiday previews for clients. Mention that weather and marina details must be verified before booking. Return only valid JSON, with no markdown fences.",
-          },
-          {
-            role: "user",
-            content: `Create a ${days}-day holiday preview and route map data.
-
-Region: ${region}
-Starting point: ${start}
-Guests: ${guests}
-Vessel style: ${vessel}
-Trip mood: ${mood}
-
-Include:
-- Short route summary
-- Day-by-day itinerary
-- Suggested marinas or anchorages
-- Swimming stops
-- Family-friendly pacing, short passages, safe swim stops, and kid-friendly food if trip mood is with kids
-- Food, wine, seafood, and local culture ideas
-- Provisioning notes
-- Weather assumptions
-- Safety notes
-- Fuel notes if powerboat or mixed vessel style
-
-Return only this JSON shape:
-{
-  "summary": "Short client-friendly route summary",
-  "stops": [
-    {
-      "day": 1,
-      "name": "Starting marina or destination",
-      "type": "marina | anchorage | swim stop | town | bay",
-      "note": "Very short note",
-      "lat": 37.9838,
-      "lng": 23.7275
-    }
-  ],
-  "itinerary": [
-    "Day 1: ...",
-    "Day 2: ..."
-  ],
-  "food": ["..."],
-  "weather": "...",
-  "provisioning": "...",
-  "safety": "..."
-}
-
-Rules:
-- Include 5 to 8 route stops.
-- First stop must be ${start}.
-- Each stop must include approximate decimal coordinates as lat and lng.
-- Keep text client-friendly.
-- Do not exceed 700 words total.`,
-          },
-        ],
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(search),
     });
 
-    const data = await openaiResponse.json();
+    const data = await nausysResponse.json();
 
-    if (!openaiResponse.ok) {
-      return response.status(openaiResponse.status).json({
-        error: data.error?.message || "OpenAI request failed.",
+    if (!nausysResponse.ok || data.status !== "OK") {
+      return response.status(nausysResponse.status || 502).json({
+        error: data.message || data.error || "NAUSYS search request failed.",
+        status: data.status,
+        errorCode: data.errorCode,
+        raw: process.env.NAUSYS_DEBUG === "true" ? data : undefined,
       });
     }
 
-    const text = extractOpenAIText(data);
-    const routePlan = parseRoutePlan(text);
+    const boats = (data.freeYachtsInPeriod || []).map((item) =>
+      normalizeFreeYacht(item, body.finderRegion || "all", body.finderType || "all"),
+    );
 
     return response.status(200).json({
-      preview: formatRoutePreview(routePlan, text),
-      stops: routePlan.stops || [],
-      routePlan,
+      source: "nausys",
+      status: data.status,
+      totalCount: data.totalCount || boats.length,
+      totalPages: data.totalPages || 1,
+      currentPage: data.currentPage || search.resultsPage,
+      periodFrom: data.from || search.periodFrom,
+      periodTo: data.to || search.periodTo,
+      boats,
     });
   } catch (error) {
     return response.status(500).json({
-      error: error.message || "Could not generate route preview.",
+      error: error.message || "Could not connect to NAUSYS.",
     });
   }
 };
 
-function extractOpenAIText(data) {
-  if (typeof data.output_text === "string" && data.output_text.trim()) {
-    return data.output_text;
+function buildNausysSearch(body, username, password) {
+  const dateRange = resolveDateRange(body.finderDate);
+  const request = {
+    credentials: { username, password },
+    periodFrom: dateRange.from,
+    periodTo: dateRange.to,
+    resultsPerPage: Number(process.env.NAUSYS_RESULTS_PER_PAGE || body.resultsPerPage || 12),
+    resultsPage: Number(body.resultsPage || 1),
+    currency: "EUR",
+    orderby: body.sort === "price" ? 2 : 5,
+    desc: body.sort === "year" ? 1 : 0,
+    extendedDataSet: "PAYMENT_PLAN",
+  };
+
+  const regionIds = regionIdsFor(body.finderRegion);
+  if (regionIds.length) {
+    request.regions = regionIds;
   }
 
-  if (!Array.isArray(data.output)) {
-    return "";
+  const categoryIds = YACHT_CATEGORY_BY_TYPE[body.finderType];
+  if (categoryIds) {
+    request.yachtCategories = categoryIds;
   }
 
-  return data.output
-    .flatMap((item) => item.content || [])
-    .map((content) => content.text || "")
-    .filter(Boolean)
-    .join("\n\n")
-    .trim();
+  const priceTo = Number(body.maxPrice);
+  if (priceTo) {
+    request.priceTo = priceTo;
+  }
+
+  const cabins = Number(body.finderCabins || body.minCabins);
+  if (cabins) {
+    request.cabins = [cabins];
+  }
+
+  return request;
 }
 
-function parseRoutePlan(text) {
+function resolveDateRange(value) {
+  const start = value ? new Date(`${value}T12:00:00Z`) : nextSaturday();
+  const end = new Date(start);
+  end.setUTCDate(start.getUTCDate() + 7);
+
+  return {
+    from: formatNausysDate(start),
+    to: formatNausysDate(end),
+  };
+}
+
+function nextSaturday() {
+  const date = new Date();
+  date.setUTCHours(12, 0, 0, 0);
+  const day = date.getUTCDay();
+  const daysUntilSaturday = (6 - day + 7) % 7 || 7;
+  date.setUTCDate(date.getUTCDate() + daysUntilSaturday);
+  return date;
+}
+
+function formatNausysDate(date) {
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  return `${day}.${month}.${date.getUTCFullYear()}`;
+}
+
+function regionIdsFor(region) {
   try {
-    return JSON.parse(text);
+    const configured = JSON.parse(process.env.NAUSYS_REGION_IDS_BY_KEY || "{}");
+    const ids = configured[region];
+    return Array.isArray(ids) ? ids.map(Number).filter(Boolean) : [];
   } catch {
-    const match = text.match(/\{[\s\S]*\}/);
-    if (match) {
-      try {
-        return JSON.parse(match[0]);
-      } catch {
-        return {
-          summary: text || "No preview generated.",
-          stops: [],
-          itinerary: [],
-        };
-      }
-    }
-    return {
-      summary: text || "No preview generated.",
-      stops: [],
-      itinerary: [],
-    };
+    return [];
   }
 }
 
-function formatRoutePreview(routePlan, fallbackText) {
-  if (!routePlan || typeof routePlan !== "object") {
-    return fallbackText || "No preview generated.";
+function normalizeFreeYacht(item, selectedRegion, selectedType) {
+  const details = item.yacht || item.restYacht || item.details || {};
+  const price = item.price || {};
+  const yachtId = item.yachtId || details.id;
+  const cabins = numberOrFallback(details.cabins, details.cabinsTotal, 0);
+  const berths = numberOrFallback(details.berthsTotal, details.berthsCabin, 0);
+  const year = numberOrFallback(details.buildYear, details.year, "");
+  const length = details.loa ? `${details.loa} m` : details.length ? `${details.length} m` : "";
+
+  return {
+    id: `nausys-${yachtId || Math.random().toString(36).slice(2)}`,
+    nausysYachtId: yachtId,
+    name: details.name || item.yachtName || `NAUSYS yacht ${yachtId || ""}`.trim(),
+    type: inferBoatType(details, selectedType),
+    region: selectedRegion === "all" ? "nausys-live" : selectedRegion,
+    base: details.baseName || details.locationName || `Base ID ${item.locationFromId || details.baseId || ""}`.trim(),
+    price: Number(price.clientPrice || price.priceListPrice || item.clientPrice || item.price || 0),
+    listPrice: Number(price.priceListPrice || 0),
+    currency: price.currency || item.currency || "EUR",
+    rating: Number(details.euminia?.total || 4.6),
+    year,
+    cabins,
+    berths,
+    length,
+    skipper: true,
+    ac: hasEquipment(details, ["air condition", "a/c", "generator"]),
+    waterToys: hasEquipment(details, ["sup", "snork", "water toy", "dinghy"]),
+    badge: "NAUSYS live",
+    image: cleanImageUrl(details.mainPictureUrl) || pictureFromList(details) || imageFromId(yachtId),
+    fallbackImage: FALLBACK_IMAGE,
+    periodFrom: item.periodFrom || "",
+    periodTo: item.periodTo || "",
+    note: `Available ${item.periodFrom || ""} to ${item.periodTo || ""}. Real NAUSYS ID ${yachtId || "pending"}.`,
+    source: "nausys",
+  };
+}
+
+function inferBoatType(details, fallbackType) {
+  const text = `${details.categoryName || ""} ${details.yachtCategoryName || ""} ${details.modelName || ""}`.toLowerCase();
+  if (text.includes("catamaran")) return "catamaran";
+  if (text.includes("motor")) return "motor";
+  if (text.includes("power")) return "powerboat";
+  if (fallbackType && fallbackType !== "all") return fallbackType;
+  return "sailing";
+}
+
+function cleanImageUrl(value) {
+  if (!value || typeof value !== "string") return "";
+  const match = value.match(/https?:\/\/\S+/);
+  return match ? `${match[0].replace(/[",]+$/, "")}?w=900` : "";
+}
+
+function pictureFromList(details) {
+  const pictures = Array.isArray(details.pictures) ? details.pictures : [];
+  const picture = pictures.find((item) => item.mainPicture || item.src) || pictures[0];
+  return cleanImageUrl(picture?.src);
+}
+
+function imageFromId(yachtId) {
+  return yachtId ? `${NAUSYS_BASE_URL}/yacht/${yachtId}/pictures/main.jpg?w=900` : FALLBACK_IMAGE;
+}
+
+function hasEquipment(details, needles) {
+  const equipment = [
+    ...(details.standardYachtEquipment || []),
+    ...(details.additionalYachtEquipment || []),
+  ];
+  const text = JSON.stringify(equipment).toLowerCase();
+  return needles.some((needle) => text.includes(needle));
+}
+
+function numberOrFallback(...values) {
+  for (const value of values) {
+    const number = Number(value);
+    if (Number.isFinite(number) && number > 0) {
+      return number;
+    }
   }
-
-  const sections = [];
-
-  if (routePlan.summary) {
-    sections.push(routePlan.summary);
-  }
-
-  if (Array.isArray(routePlan.itinerary) && routePlan.itinerary.length) {
-    sections.push(`Itinerary:\n${routePlan.itinerary.join("\n")}`);
-  }
-
-  if (Array.isArray(routePlan.food) && routePlan.food.length) {
-    sections.push(`Food and culture:\n${routePlan.food.join("\n")}`);
-  }
-
-  if (routePlan.weather) {
-    sections.push(`Weather:\n${routePlan.weather}`);
-  }
-
-  if (routePlan.provisioning) {
-    sections.push(`Provisioning:\n${routePlan.provisioning}`);
-  }
-
-  if (routePlan.safety) {
-    sections.push(`Safety:\n${routePlan.safety}`);
-  }
-
-  return sections.join("\n\n") || fallbackText || "No preview generated.";
+  return values[values.length - 1];
 }

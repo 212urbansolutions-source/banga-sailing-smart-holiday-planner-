@@ -67,22 +67,14 @@ module.exports = async function handler(request, response) {
 function normalizeYacht(yacht) {
   const yachtId = yacht.id;
   const pictures = normalizePictures(yacht, yachtId);
-  const standardEquipment = normalizeEquipmentList(yacht.standardYachtEquipment);
-  const additionalEquipment = normalizeEquipmentList(yacht.additionalYachtEquipment);
 
   return {
     id: yachtId,
     name: cleanName(yacht.name) || `NAUSYS yacht ${yachtId}`,
     modelId: yacht.yachtModelId || "",
-    modelName: yacht.modelName || yacht.yachtModelName || yacht.yachtModel?.name || "",
-    builderName: yacht.builderName || yacht.yachtBuilderName || yacht.yachtBuilder?.name || "",
-    categoryName: yacht.categoryName || yacht.yachtCategoryName || yacht.yachtCategory?.name || "",
     companyId: yacht.companyId || "",
-    companyName: yacht.companyName || yacht.charterCompanyName || "",
     baseId: yacht.baseId || "",
-    baseName: yacht.baseName || yacht.charterBaseName || yacht.base?.name || "",
     locationId: yacht.locationId || "",
-    locationName: yacht.locationName || yacht.location?.name || "",
     type: inferBoatType(yacht),
     cabins: yacht.cabins || 0,
     cabinsCrew: yacht.cabinsCrew || 0,
@@ -93,35 +85,23 @@ function normalizeYacht(yacht) {
     wc: yacht.wc || 0,
     wcCrew: yacht.wcCrew || 0,
     buildYear: yacht.buildYear || yacht.year || "",
-    refitYear: yacht.refitYear || "",
     loa: yacht.loa || yacht.length || "",
-    beam: yacht.beam || "",
     draft: yacht.draft || "",
     engines: yacht.engines || "",
     enginePower: yacht.enginePower || "",
-    fuelTank: yacht.fuelTank || yacht.fuelCapacity || "",
-    waterTank: yacht.waterTank || yacht.waterCapacity || "",
-    sailTypeId: yacht.sailTypeId || "",
-    steeringTypeId: yacht.steeringTypeId || "",
     rating: Number(yacht.euminia?.total || 4.6),
     reviews: yacht.euminia?.reviews || "",
     deposit: yacht.deposit || "",
-    depositWhenInsured: yacht.depositWhenInsured || "",
     commission: yacht.commission || "",
-    checkIn: yacht.checkIn || yacht.checkInTime || "",
-    checkOut: yacht.checkOut || yacht.checkOutTime || "",
     mainPictureUrl: pictures[0] || imageFromId(yachtId),
     pictures,
-    standardEquipment,
-    additionalEquipment,
-    standardEquipmentCount: standardEquipment.length,
-    additionalEquipmentCount: additionalEquipment.length,
-    services: normalizePriceRows(yacht.services),
-    prices: normalizePriceRows(yacht.prices),
-    regularDiscounts: normalizePriceRows(yacht.regularDiscounts),
-    highlights: textValue(yacht.highlights) || textValue(yacht.highlightsIntText),
-    note: textValue(yacht.note) || textValue(yacht.noteIntText),
-    equipmentHighlights: equipmentHighlights(yacht, standardEquipment, additionalEquipment),
+    standardEquipmentCount: Array.isArray(yacht.standardYachtEquipment)
+      ? yacht.standardYachtEquipment.length
+      : 0,
+    additionalEquipmentCount: Array.isArray(yacht.additionalYachtEquipment)
+      ? yacht.additionalYachtEquipment.length
+      : 0,
+    equipmentHighlights: equipmentHighlights(yacht),
     rawAvailable: process.env.NAUSYS_DEBUG === "true",
   };
 }
@@ -175,8 +155,12 @@ function inferBoatType(yacht) {
   return "Sailing yacht";
 }
 
-function equipmentHighlights(yacht, standardEquipment, additionalEquipment) {
-  const text = JSON.stringify([standardEquipment, additionalEquipment]).toLowerCase();
+function equipmentHighlights(yacht) {
+  const equipment = [
+    ...(yacht.standardYachtEquipment || []),
+    ...(yacht.additionalYachtEquipment || []),
+  ];
+  const text = JSON.stringify(equipment).toLowerCase();
   const highlights = [];
 
   if (text.includes("air") || text.includes("a/c")) highlights.push("Air conditioning");
@@ -186,50 +170,4 @@ function equipmentHighlights(yacht, standardEquipment, additionalEquipment) {
   if (text.includes("bow")) highlights.push("Bow thruster");
 
   return highlights.length ? highlights : ["Inventory details from NAUSYS", "Equipment list available by API"];
-}
-
-function normalizeEquipmentList(items) {
-  return (Array.isArray(items) ? items : [])
-    .map((item) => ({
-      id: item.id || "",
-      equipmentId: item.equipmentId || item.extraId || "",
-      name: item.name || item.equipmentName || textValue(item.text) || textValue(item.nameIntText) || "",
-      quantity: item.quantity || item.quantityExtras || "",
-      price: item.price || item.amount || item.listPrice || "",
-      currency: item.currency || "",
-      priceMeasureId: item.priceMeasureId || "",
-      obligatory: Boolean(item.obligatory),
-    }))
-    .filter((item) => item.id || item.equipmentId || item.name);
-}
-
-function normalizePriceRows(items) {
-  return (Array.isArray(items) ? items : [])
-    .map((item) => ({
-      id: item.id || item.serviceId || item.discountItemId || "",
-      name: item.name || item.serviceName || textValue(item.nameIntText) || "",
-      type: item.type || item.calculationType || "",
-      price: item.price || item.amount || item.listPrice || item.clientPrice || "",
-      currency: item.currency || "",
-      priceMeasureId: item.priceMeasureId || "",
-      obligatory: Boolean(item.obligatory),
-      periodFrom: item.periodFrom || item.dateFrom || "",
-      periodTo: item.periodTo || item.dateTo || "",
-    }))
-    .filter((item) => item.id || item.name || item.price || item.periodFrom);
-}
-
-function textValue(value) {
-  if (!value) return "";
-  if (typeof value === "string") return value.trim();
-  if (typeof value !== "object") return "";
-
-  for (const key of ["en", "EN", "eng", "text", "value", "name"]) {
-    if (typeof value[key] === "string" && value[key].trim()) {
-      return value[key].trim();
-    }
-  }
-
-  const first = Object.values(value).find((item) => typeof item === "string" && item.trim());
-  return first ? first.trim() : "";
 }
