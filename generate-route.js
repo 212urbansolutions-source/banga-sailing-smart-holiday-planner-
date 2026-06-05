@@ -113,15 +113,12 @@ img {
   color: var(--white);
   background:
     linear-gradient(90deg, rgba(4, 55, 68, 0.76), rgba(0, 155, 177, 0.18) 58%, rgba(255, 200, 74, 0.16)),
-    url("assets/hero-catamaran-adobe.jpg"),
     url("https://images.pexels.com/photos/32330651/pexels-photo-32330651.jpeg?auto=compress&cs=tinysrgb&w=2400")
       center 58% / cover;
   background-position:
     center,
-    center 58%,
     center 58%;
   background-size:
-    cover,
     cover,
     cover;
 }
@@ -708,6 +705,11 @@ h2 {
   height: 100%;
   min-height: 245px;
   object-fit: cover;
+}
+
+.boat-card-image-link {
+  display: block;
+  min-height: 245px;
 }
 
 .boat-card-body {
@@ -1339,6 +1341,23 @@ h2 {
   font-weight: 800;
 }
 
+.detail-id-list {
+  display: grid;
+  gap: 8px;
+}
+
+.detail-id-list div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 8px;
+}
+
+.detail-id-list span {
+  color: var(--muted);
+}
+
 @media (max-width: 900px) {
   .site-header {
     position: absolute;
@@ -1347,11 +1366,9 @@ h2 {
   .hero {
     background-position:
       center,
-      54% 84%,
       center 70%;
     background-size:
       cover,
-      auto 160%,
       cover;
   }
 

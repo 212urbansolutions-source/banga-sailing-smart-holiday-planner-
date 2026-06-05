@@ -3,393 +3,482 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Boat Details | Sailing Holidays</title>
+    <title>Sailing Holidays | Yacht Charter Planning</title>
     <meta
       name="description"
-      content="Detailed yacht charter page with live NAUSYS boat information, pictures, price, dates, specs, equipment and inquiry options."
+      content="AI assisted sailing yacht and powerboat holiday planning with routes, weather windows, marinas, food, culture, provisioning, fuel stops, and recommendations."
     />
-    <link rel="stylesheet" href="styles.css?v=boat-inline-detail" />
+    <link rel="preconnect" href="https://images.unsplash.com" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <link rel="stylesheet" href="styles.css?v=boat-page-v2" />
   </head>
-  <body class="boat-detail-page">
-    <header class="detail-header">
-      <a class="brand detail-brand" href="index.html#top" aria-label="Sailing Holidays home">
+  <body>
+    <header class="site-header" aria-label="Primary navigation">
+      <a class="brand" href="#top" aria-label="Sailing Holidays home">
         <span class="brand-mark">S</span>
         <span>Sailwise AI</span>
       </a>
-      <a class="button light" href="index.html#boat-finder">Back to boats</a>
+      <nav class="nav-links" aria-label="Main">
+        <a href="#planner">Planner</a>
+        <a href="#charters">Yachts</a>
+        <a href="#boat-finder">Boat Finder</a>
+        <a href="#moments">Moments</a>
+        <a href="#local">Local</a>
+        <a href="#events">Events</a>
+        <a href="#routes">Routes</a>
+        <a href="#concierge">Concierge</a>
+      </nav>
+      <a class="nav-cta" href="#planner">Plan a Trip</a>
     </header>
 
-    <main class="boat-detail" id="boatDetail">
-      <section class="detail-loading">
-        <p class="eyebrow">Live charter detail</p>
-        <h1>Loading yacht details...</h1>
-        <p>Connecting to NAUSYS and preparing the boat page.</p>
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-shade"></div>
+        <div class="hero-inner">
+          <div class="hero-copy">
+            <p class="eyebrow">Sailing yacht and powerboat planning with live intelligence</p>
+            <h1 id="hero-title">Sailing Holidays</h1>
+            <p class="hero-lede">
+              Create tailored sea holidays for sailing vessels and powerboats, combining yacht
+              availability, weather windows, marina stops, fuel planning, culture, food,
+              provisioning, and day-by-day sea conditions.
+            </p>
+            <div class="hero-actions">
+              <a class="button primary" href="#planner">Build my route</a>
+              <a class="button ghost" href="#charters">Browse vessel types</a>
+            </div>
+          </div>
+
+          <aside class="planner-panel" id="planner" aria-label="AI sailing holiday route planner">
+            <div class="panel-heading">
+              <p class="eyebrow">Route intelligence</p>
+              <h2>Plan your week</h2>
+            </div>
+
+            <form class="planner-form" id="routeForm">
+              <label>
+                Region
+                <select name="region" id="regionSelect">
+                  <option value="croatia-dalmatia">Croatia, Dalmatian Coast</option>
+                  <option value="greece-ionian">Greece, Ionian Sea</option>
+                  <option value="greece-saronic">Greece, Saronic Gulf</option>
+                  <option value="greece-cyclades">Greece, Cyclades</option>
+                  <option value="turkey-lycian">Turkey, Lycian Coast</option>
+                  <option value="italy-amalfi">Italy, Amalfi & Capri</option>
+                  <option value="bvi">British Virgin Islands</option>
+                </select>
+              </label>
+
+              <label>
+                Starting point
+                <select name="start" id="startSelect"></select>
+              </label>
+
+              <div class="field-grid">
+                <label>
+                  Guests
+                  <input name="guests" type="number" min="2" max="12" value="6" />
+                </label>
+                <label>
+                  Days
+                  <input name="days" type="number" min="3" max="14" value="7" />
+                </label>
+              </div>
+
+              <fieldset class="segmented vessel-options" aria-label="Vessel style">
+                <legend>Vessel style</legend>
+                <label><input type="radio" name="vessel" value="sailing" checked /> Sailing</label>
+                <label><input type="radio" name="vessel" value="powerboat" /> Powerboat</label>
+                <label><input type="radio" name="vessel" value="mixed" /> Both</label>
+              </fieldset>
+
+              <fieldset class="segmented" aria-label="Trip mood">
+                <legend>Trip mood</legend>
+                <label><input type="radio" name="mood" value="balanced" checked /> Balanced</label>
+                <label><input type="radio" name="mood" value="kids" /> With kids</label>
+                <label><input type="radio" name="mood" value="culture" /> Culture</label>
+              </fieldset>
+
+              <button class="button primary full" type="submit">Generate preview</button>
+            </form>
+
+            <div class="route-output" id="routeOutput" aria-live="polite">
+              <div>
+                <span class="metric">12-18 kn</span>
+                <small>typical wind window</small>
+              </div>
+              <div>
+                <span class="metric">5 marinas</span>
+                <small>with fuel and calm alternates</small>
+              </div>
+              <div>
+                <span class="metric">7 days</span>
+                <small>Split to Dubrovnik</small>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="trust-strip" aria-label="Planning categories">
+        <span>Weather routing</span>
+        <span>Marina reservations</span>
+        <span>Fuel stops</span>
+        <span>Corporate regattas</span>
+        <span>Provisioning lists</span>
+        <span>Lithuania & Europe</span>
+        <span>Local food</span>
+        <span>Wine & seafood</span>
+        <span>Cultural stops</span>
+      </section>
+
+      <section class="finder-section" id="boat-finder" aria-labelledby="finder-title">
+        <div class="finder-head">
+          <div>
+            <p class="eyebrow">Charter marketplace</p>
+            <h2 id="finder-title">Find the right boat for the route</h2>
+          </div>
+          <p>
+            A broker-ready search layer for weekly charters, skippered holidays, catamarans,
+            sailing yachts, motor yachts, and day boats. Search can now connect to NAUSYS live
+            availability when API credentials are configured.
+          </p>
+        </div>
+
+        <form class="finder-search" id="boatFinderForm">
+          <label>
+            Destination
+            <select name="finderRegion" id="finderRegion">
+              <option value="all">Any destination</option>
+              <option value="greece-ionian">Greece, Ionian Sea</option>
+              <option value="greece-saronic">Greece, Saronic Gulf</option>
+              <option value="croatia-dalmatia">Croatia, Dalmatian Coast</option>
+              <option value="turkey-lycian">Turkey, Lycian Coast</option>
+              <option value="italy-amalfi">Italy, Amalfi & Capri</option>
+            </select>
+          </label>
+          <label>
+            Date
+            <input name="finderDate" type="date" />
+          </label>
+          <label>
+            Cabins
+            <input name="finderCabins" type="number" min="1" max="8" value="3" />
+          </label>
+          <label>
+            Boat type
+            <select name="finderType" id="finderType">
+              <option value="all">All boats</option>
+              <option value="catamaran">Catamaran</option>
+              <option value="sailing">Sailing yacht</option>
+              <option value="motor">Motor yacht</option>
+              <option value="powerboat">Powerboat</option>
+            </select>
+          </label>
+          <button class="button primary" type="submit">Search boats</button>
+        </form>
+
+        <div class="finder-layout">
+          <aside class="finder-filters" aria-label="Boat filters">
+            <div class="mobile-filter-head">
+              <h3>Filters</h3>
+              <button class="button light" type="button" id="closeFilters">Close</button>
+            </div>
+            <div class="filter-block">
+              <h3>Budget</h3>
+              <label>
+                Max weekly price
+                <input id="priceFilter" type="range" min="3000" max="16000" step="500" value="12000" />
+              </label>
+              <output id="priceOutput">Up to EUR 12,000</output>
+            </div>
+            <div class="filter-block">
+              <h3>Comfort</h3>
+              <label class="check-row"><input id="skipperFilter" type="checkbox" /> Skipper available</label>
+              <label class="check-row"><input id="acFilter" type="checkbox" /> Air conditioning</label>
+              <label class="check-row"><input id="waterToysFilter" type="checkbox" /> Water toys</label>
+            </div>
+            <div class="filter-block">
+              <h3>Cabins</h3>
+              <select id="cabinsFilter">
+                <option value="0">Any cabins</option>
+                <option value="3">3+ cabins</option>
+                <option value="4">4+ cabins</option>
+                <option value="5">5+ cabins</option>
+              </select>
+            </div>
+          </aside>
+
+          <div class="finder-results-wrap">
+            <div class="mobile-filter-bar">
+              <button class="button light" type="button" id="openFilters">Filter</button>
+              <label>
+                Sort
+                <select id="mobileSortBoats">
+                  <option value="recommended">Recommended</option>
+                  <option value="price">Lowest price</option>
+                  <option value="rating">Highest rating</option>
+                  <option value="year">Newest</option>
+                </select>
+              </label>
+            </div>
+            <div class="finder-toolbar">
+              <span id="boatResultCount">6 boats found</span>
+              <label>
+                Sort
+                <select id="sortBoats">
+                  <option value="recommended">Recommended</option>
+                  <option value="price">Lowest price</option>
+                  <option value="rating">Highest rating</option>
+                  <option value="year">Newest</option>
+                </select>
+              </label>
+            </div>
+            <div class="boat-results" id="boatResults" aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="charters">
+        <div class="section-head">
+          <p class="eyebrow">Charter search layer</p>
+          <h2>Built for vessel inventory</h2>
+          <p>
+            The page is ready for broker API results across sailing yachts, catamarans,
+            powerboats, motor yachts, ribs, and premium crewed vessels in the same recommendation flow.
+          </p>
+        </div>
+
+        <div class="yacht-grid">
+          <article class="yacht-card">
+            <img
+              src="https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&fit=crop&w=900&q=80"
+              alt="Sailing catamaran anchored in clear blue water"
+            />
+            <div class="card-body">
+              <span>Family comfort</span>
+              <h3>Crewed Catamarans</h3>
+              <p>Stable living space, shaded decks, water toys, and easy swim stops.</p>
+            </div>
+          </article>
+          <article class="yacht-card">
+            <img
+              src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80"
+              alt="Sailing vessel near a Mediterranean beach and turquoise water"
+            />
+            <div class="card-body">
+              <span>Classic sailing</span>
+              <h3>Monohulls & Skippered Yachts</h3>
+              <p>Wind-led routes that adapt to licensing, crew confidence, swim stops, and weather.</p>
+            </div>
+          </article>
+          <article class="yacht-card">
+            <img
+              src="https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&fit=crop&w=900&q=80"
+              alt="Powerboat moving quickly across bright blue water"
+            />
+            <div class="card-body">
+              <span>Fast island hopping</span>
+              <h3>Powerboats & Motor Yachts</h3>
+              <p>Shorter passages, fuel-aware routing, beach clubs, watersports, and flexible day plans.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="moments-section" id="moments" aria-labelledby="moments-title">
+        <div class="moments-head">
+          <p class="eyebrow">Holiday style</p>
+          <h2 id="moments-title">More than the boat</h2>
+          <p>
+            The planner should sell the feeling of the week: quiet mornings under sail, lazy
+            catamaran afternoons, swim stops in clear bays, sunset wine, and a grilled seafood table ashore.
+          </p>
+        </div>
+        <div class="moments-grid">
+          <article class="moment-card large">
+            <img
+              src="https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&fit=crop&w=1200&q=82"
+              alt="Catamaran anchored in clear water for a relaxed holiday"
+            />
+            <div>
+              <span>Catamaran living</span>
+              <h3>Deck space, shade, and easy swims</h3>
+            </div>
+          </article>
+          <article class="moment-card">
+            <img
+              src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=82"
+              alt="Sailing vessel on calm coastal water"
+            />
+            <div>
+              <span>Under sail</span>
+              <h3>Wind, silence, and coastal passages</h3>
+            </div>
+          </article>
+          <article class="moment-card">
+            <img
+              src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=900&q=82"
+              alt="Holiday swimmer in bright tropical water"
+            />
+            <div>
+              <span>Swim stops</span>
+              <h3>Clear bays between marina nights</h3>
+            </div>
+          </article>
+          <article class="moment-card wide">
+            <img
+              src="https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=1200&q=82"
+              alt="Wine glasses prepared for a relaxed evening meal"
+            />
+            <div>
+              <span>Food and wine</span>
+              <h3>Local tavernas, wine pairings, and grilled octopus nights</h3>
+            </div>
+          </article>
+        </div>
+        <div class="taste-strip">
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/2/2d/GrilledOctopus.JPG"
+            alt="Grilled octopus served in Greece"
+          />
+          <div>
+            <p class="eyebrow">Ashore after the swim</p>
+            <h3>Grilled octopus, chilled wine, and a table close to the water</h3>
+            <p>
+              Route recommendations can include tavernas, seafood stops, local markets,
+              wine pairings, and provisioning notes so the holiday feels planned beyond the marina.
+            </p>
+            <small>Photo by Tom Oates, CC BY-SA 3.0.</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="local-section" id="local">
+        <div class="local-copy">
+          <p class="eyebrow">Local credibility</p>
+          <h2>Lithuania as a starting advantage</h2>
+          <p>
+            A strong boat-holiday brand should feel close to home before it feels global. This section
+            separates local half-day and weekend rentals from longer Mediterranean holidays, so
+            first-time clients, corporate groups, and repeat charter guests all find the right entry point.
+          </p>
+        </div>
+        <div class="local-grid">
+          <article>
+            <span>Klaipeda, Nida, Trakai</span>
+            <h3>Local boat days</h3>
+            <p>Half-day, evening, weekend, sailing yacht, motorboat, and skippered formats for simple client conversion.</p>
+          </article>
+          <article>
+            <span>Greece, Croatia, Spain, Turkey</span>
+            <h3>European charters</h3>
+            <p>Destination pages can connect to sailing and powerboat availability with AI route packs.</p>
+          </article>
+          <article>
+            <span>Reviews, press, associations</span>
+            <h3>Trust layer</h3>
+            <p>Use memberships, client logos, reviews, and media mentions near inquiry points.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="events-band" id="events">
+        <div class="events-media" aria-hidden="true"></div>
+        <div class="events-copy">
+          <p class="eyebrow">Business on the water</p>
+          <h2>Corporate regattas, cruises, and team events</h2>
+          <p>
+            Offer guided regattas, powerboat day cruises, company celebrations, client hosting,
+            transport, meals, accommodation, and entertainment as one planned package. The AI planner
+            can turn group size, timing, and risk tolerance into a clear event proposal.
+          </p>
+          <div class="event-actions">
+            <a class="button primary" href="#inquiry">Request event plan</a>
+            <a class="button light" href="#charters">See vessel options</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="route-section" id="routes">
+        <div class="route-copy">
+          <p class="eyebrow">Route engine</p>
+          <h2>Every itinerary has a plan B</h2>
+          <p>
+            AI suggestions can blend forecast ranges, protected anchorages, marina availability,
+            restaurant openings, fuel stops, cruising speeds, transfer times, and cultural priorities
+            into a route that feels easy for clients and practical for crews.
+          </p>
+        </div>
+        <div class="route-map" aria-label="Sample boat holiday route">
+          <div class="port port-a">Split</div>
+          <div class="port port-b">Hvar</div>
+          <div class="port port-c">Korcula</div>
+          <div class="port port-d">Mljet</div>
+          <div class="port port-e">Dubrovnik</div>
+          <svg viewBox="0 0 640 360" role="img" aria-label="Curved sample boat route line">
+            <path d="M68 98 C160 38 210 154 286 112 S430 94 462 178 S544 246 588 188" />
+          </svg>
+        </div>
+      </section>
+
+      <section class="section compact" id="concierge">
+        <div class="section-head">
+          <p class="eyebrow">Client experience</p>
+          <h2>From inquiry to onboard briefing</h2>
+        </div>
+        <div class="feature-row">
+          <article>
+            <h3>Preference capture</h3>
+            <p>Travel style, budget, crew experience, food preferences, mobility, and celebration details.</p>
+          </article>
+          <article>
+            <h3>Smart route pack</h3>
+            <p>Daily passages, marina alternates, fuel stops, swim stops, restaurants, markets, and transfer notes.</p>
+          </article>
+          <article>
+            <h3>Broker handoff</h3>
+            <p>Shortlisted vessels, transparent assumptions, quote-ready client notes, and next actions.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="inquiry-section" id="inquiry" aria-labelledby="inquiry-title">
+        <div>
+          <p class="eyebrow">Early season offer</p>
+          <h2 id="inquiry-title">Turn an idea into a quote-ready route</h2>
+          <p>
+            Capture the essentials now: dates, crew, destination, boat style, speed preference,
+            food preferences, and event needs. Later, API matches can appear directly beside the generated route.
+          </p>
+        </div>
+        <form class="inquiry-form">
+          <label>
+            Name
+            <input type="text" name="name" placeholder="Your name" />
+          </label>
+          <label>
+            Email
+            <input type="email" name="email" placeholder="you@example.com" />
+          </label>
+          <label>
+            Trip idea
+            <textarea name="idea" placeholder="Destination, dates, guests, sailing yacht or powerboat style"></textarea>
+          </label>
+          <button class="button primary full" type="button">Prepare my brief</button>
+        </form>
       </section>
     </main>
 
-    <script>
-      const boatDetail = document.querySelector("#boatDetail");
-      const params = new URLSearchParams(window.location.search);
-      const yachtId = params.get("id") || params.get("yachtId");
-      const dateFrom = params.get("dateFrom") || "";
-      const dateTo = params.get("dateTo") || "";
-      const price = Number(params.get("price") || 0);
-      const listPrice = Number(params.get("listPrice") || 0);
-      const currency = params.get("currency") || "EUR";
-      const source = params.get("source") || "nausys";
+    <footer class="footer">
+      <span>Sailwise AI</span>
+      <a href="mailto:hello@example.com">hello@example.com</a>
+    </footer>
 
-      loadBoatDetail();
-
-      async function loadBoatDetail() {
-        if (!boatDetail) return;
-
-        if (!yachtId) {
-          renderError("Missing yacht ID. Please open this page from the boat finder results.");
-          return;
-        }
-
-        try {
-          const response = await fetch(`/api/nausys-yacht?id=${encodeURIComponent(yachtId)}`);
-          const data = await readJsonResponse(response);
-
-          if (!response.ok) {
-            throw new Error(data.error || "Could not load yacht details.");
-          }
-
-          renderBoat(data.yacht);
-        } catch (error) {
-          renderFallbackBoat(error.message);
-        }
-      }
-
-      async function readJsonResponse(response) {
-        const text = await response.text();
-        try {
-          return JSON.parse(text);
-        } catch {
-          return { error: "Boat detail API is not available yet." };
-        }
-      }
-
-      function renderBoat(yacht) {
-        const pictures = yacht.pictures?.length ? yacht.pictures : [yacht.mainPictureUrl].filter(Boolean);
-        const heroImage =
-          pictures[0] ||
-          "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&fit=crop&w=1200&q=82";
-
-        const modelTitle = [yacht.builderName, yacht.modelName].filter(Boolean).join(" ");
-        const baseLine = [yacht.baseName, yacht.locationName].filter(Boolean).join(", ");
-        const readableName = modelTitle || yacht.name;
-        const heroFacts = compactRows([
-          ["Type", yacht.type],
-          ["Cabins", yacht.cabins],
-          ["Guests", yacht.berthsTotal],
-          ["WC", yacht.wc],
-          ["Year", yacht.buildYear],
-          ["Length", meters(yacht.loa)],
-        ]);
-
-        const accommodation = compactRows([
-          ["Guest cabins", yacht.cabins],
-          ["Crew cabins", yacht.cabinsCrew],
-          ["Cabin berths", yacht.berthsCabin],
-          ["Salon berths", yacht.berthsSalon],
-          ["Crew berths", yacht.berthsCrew],
-          ["Total guests", yacht.berthsTotal],
-          ["Bathrooms", yacht.wc],
-          ["Crew WC", yacht.wcCrew],
-        ]);
-
-        const technical = compactRows([
-          ["Builder / model", modelTitle],
-          ["Category", yacht.categoryName || yacht.type],
-          ["Build year", yacht.buildYear],
-          ["Refit year", yacht.refitYear],
-          ["Length", meters(yacht.loa)],
-          ["Beam", meters(yacht.beam)],
-          ["Draft", meters(yacht.draft)],
-          ["Engines", yacht.engines],
-          ["Engine power", yacht.enginePower ? `${yacht.enginePower} hp` : ""],
-          ["Fuel tank", litres(yacht.fuelTank)],
-          ["Water tank", litres(yacht.waterTank)],
-          ["Sail type ID", yacht.sailTypeId],
-          ["Steering type ID", yacht.steeringTypeId],
-        ]);
-
-        const commercial = compactRows([
-          ["Charter company", yacht.companyName],
-          ["Base", yacht.baseName],
-          ["Location", yacht.locationName],
-          ["Check-in", yacht.checkIn],
-          ["Check-out", yacht.checkOut],
-          ["Security deposit", yacht.deposit ? formatPrice(Number(yacht.deposit), currency) : ""],
-          ["Insured deposit", yacht.depositWhenInsured ? formatPrice(Number(yacht.depositWhenInsured), currency) : ""],
-          ["Agency commission", yacht.commission ? `${Number(yacht.commission) * 100}%` : ""],
-          ["Rating", yacht.rating],
-          ["Reviews", yacht.reviews],
-        ]);
-
-        const ids = compactRows([
-          ["NAUSYS yacht ID", yacht.id],
-          ["Model ID", yacht.modelId],
-          ["Company ID", yacht.companyId],
-          ["Base ID", yacht.baseId],
-          ["Location ID", yacht.locationId],
-        ]);
-
-        const availableStandard = yacht.standardEquipment || [];
-        const availableExtra = yacht.additionalEquipment || [];
-
-        document.title = `${yacht.name} | Sailing Holidays`;
-
-        boatDetail.innerHTML = `
-          <section class="boat-hero-detail">
-            <div class="boat-hero-media detail-hero-gallery">
-              <img class="detail-main-photo" src="${escapeHtml(heroImage)}" alt="${escapeHtml(yacht.name)} yacht charter" />
-              ${pictures.slice(1, 4).map((picture, index) => `
-                <img src="${escapeHtml(picture)}" alt="${escapeHtml(yacht.name)} detail photo ${index + 2}" />
-              `).join("")}
-            </div>
-            <div class="boat-summary-panel">
-              <p class="eyebrow">${escapeHtml(source.toUpperCase())} live boat</p>
-              <h1>${escapeHtml(yacht.name)}</h1>
-              <p class="detail-subtitle">${escapeHtml(readableName)}${baseLine ? ` | ${escapeHtml(baseLine)}` : ""}</p>
-              <div class="detail-price">
-                <strong>${formatPrice(price, currency)}</strong>
-                ${listPrice ? `<span>List price ${escapeHtml(formatPrice(listPrice, currency))}</span>` : ""}
-                <span>${escapeHtml(formatPeriod(dateFrom, dateTo))}</span>
-              </div>
-              <dl class="detail-mini-specs">
-                ${heroFacts.slice(0, 6).map(([label, value]) => `
-                  <div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(String(value))}</dd></div>
-                `).join("")}
-              </dl>
-              <div class="detail-actions">
-                <a class="button primary" href="mailto:hello@example.com?subject=${encodeURIComponent(`Charter inquiry for ${yacht.name}`)}">Request this boat</a>
-                <a class="button light" href="index.html#planner">Plan route</a>
-              </div>
-            </div>
-          </section>
-
-          <section class="detail-section detail-booking-strip">
-            <div>
-              <span>Dates</span>
-              <strong>${escapeHtml(formatPeriod(dateFrom, dateTo))}</strong>
-            </div>
-            <div>
-              <span>Base</span>
-              <strong>${escapeHtml(baseLine || yacht.baseId || "Base on request")}</strong>
-            </div>
-            <div>
-              <span>Price</span>
-              <strong>${escapeHtml(formatPrice(price, currency))}</strong>
-            </div>
-            <div>
-              <span>Status</span>
-              <strong>Live NAUSYS offer</strong>
-            </div>
-          </section>
-
-          ${yacht.highlights || yacht.note ? `
-            <section class="detail-section detail-copy-section">
-              <p class="eyebrow">Description</p>
-              <h2>About this yacht</h2>
-              ${yacht.highlights ? `<p>${escapeHtml(yacht.highlights)}</p>` : ""}
-              ${yacht.note ? `<p>${escapeHtml(yacht.note)}</p>` : ""}
-            </section>
-          ` : ""}
-
-          <section class="detail-section detail-grid-section">
-            <div>
-              <p class="eyebrow">Yacht specs</p>
-              <h2>Accommodation</h2>
-              ${renderSpecTable(accommodation)}
-            </div>
-            <aside class="detail-card booking-card">
-              <h3>Booking snapshot</h3>
-              <p class="detail-card-price">${escapeHtml(formatPrice(price, currency))}</p>
-              <p>${escapeHtml(formatPeriod(dateFrom, dateTo))}</p>
-              <p>Offer price and availability come from NAUSYS. Final booking, extras, and payment terms should be verified before confirmation.</p>
-              <a class="button primary full" href="mailto:hello@example.com?subject=${encodeURIComponent(`Charter inquiry for ${yacht.name}`)}">Send inquiry</a>
-            </aside>
-          </section>
-
-          <section class="detail-section">
-            <p class="eyebrow">Technical</p>
-            <h2>Boat dimensions and systems</h2>
-            ${renderSpecTable(technical)}
-          </section>
-
-          <section class="detail-section">
-            <p class="eyebrow">Gallery</p>
-            <h2>Photos from NAUSYS</h2>
-            <div class="boat-gallery">
-              ${pictures.slice(0, 6).map((picture, index) => `
-                <img src="${escapeHtml(picture)}" alt="${escapeHtml(yacht.name)} photo ${index + 1}" />
-              `).join("")}
-            </div>
-          </section>
-
-          <section class="detail-section detail-grid-section">
-            <div>
-              <p class="eyebrow">Equipment</p>
-              <h2>Included equipment</h2>
-              <ul class="detail-feature-list">
-                ${(yacht.equipmentHighlights || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-                ${availableStandard.slice(0, 12).map((item) => `<li>${escapeHtml(equipmentLabel(item))}</li>`).join("")}
-                ${!availableStandard.length ? `<li>${escapeHtml(String(yacht.standardEquipmentCount || 0))} standard equipment records</li>` : ""}
-              </ul>
-            </div>
-            <aside class="detail-card">
-              <h3>Optional extras</h3>
-              ${availableExtra.length ? `
-                <div class="detail-id-list">
-                  ${availableExtra.slice(0, 8).map((item) => `
-                    <div><span>${escapeHtml(equipmentLabel(item))}</span><strong>${escapeHtml(priceLabel(item))}</strong></div>
-                  `).join("")}
-                </div>
-              ` : `<p>${escapeHtml(String(yacht.additionalEquipmentCount || 0))} additional equipment records available in NAUSYS.</p>`}
-            </aside>
-          </section>
-
-          ${(yacht.prices?.length || yacht.services?.length || yacht.regularDiscounts?.length) ? `
-            <section class="detail-section detail-grid-section">
-              <div>
-                <p class="eyebrow">Offer details</p>
-                <h2>Prices, services and discounts</h2>
-                ${renderRows("Price records", yacht.prices)}
-                ${renderRows("Services", yacht.services)}
-                ${renderRows("Discounts", yacht.regularDiscounts)}
-              </div>
-              <aside class="detail-card">
-                <h3>Payment note</h3>
-                <p>These are catalogue records from NAUSYS. Some test API records are IDs only, so final client-facing pricing should be confirmed before booking.</p>
-              </aside>
-            </section>
-          ` : ""}
-
-          <section class="detail-section detail-grid-section">
-            <div>
-              <p class="eyebrow">Charter base</p>
-              <h2>Location and operator data</h2>
-              ${renderSpecTable(commercial)}
-            </div>
-            <aside class="detail-card">
-              <h3>NAUSYS catalogue references</h3>
-              <div class="detail-id-list">
-                ${ids.map(([label, value]) => `
-                  <div><span>${escapeHtml(label)}</span><strong>${escapeHtml(String(value))}</strong></div>
-                `).join("")}
-              </div>
-            </aside>
-          </section>
-        `;
-      }
-
-      function renderFallbackBoat(message) {
-        boatDetail.innerHTML = `
-          <section class="detail-loading">
-            <p class="eyebrow">Boat page</p>
-            <h1>NAUSYS yacht ${escapeHtml(yachtId)}</h1>
-            <p>${escapeHtml(message)} Showing the available booking shell for this live result.</p>
-            <div class="detail-card">
-              <h3>Availability offer</h3>
-              <p>${escapeHtml(formatPeriod(dateFrom, dateTo))}</p>
-              <p><strong>${escapeHtml(formatPrice(price, currency))}</strong></p>
-              <p>Yacht ID: ${escapeHtml(yachtId)}</p>
-            </div>
-            <a class="button primary" href="mailto:hello@example.com?subject=${encodeURIComponent(`Charter inquiry for NAUSYS yacht ${yachtId}`)}">Request this boat</a>
-          </section>
-        `;
-      }
-
-      function renderError(message) {
-        boatDetail.innerHTML = `
-          <section class="detail-loading">
-            <p class="eyebrow">Boat page</p>
-            <h1>Boat not found</h1>
-            <p>${escapeHtml(message)}</p>
-            <a class="button primary" href="index.html#boat-finder">Back to boat finder</a>
-          </section>
-        `;
-      }
-
-      function formatPrice(value, currencyCode) {
-        return value ? `${currencyCode} ${value.toLocaleString("en-US")}` : "Price on request";
-      }
-
-      function formatPeriod(from, to) {
-        if (!from && !to) return "Dates on request";
-        return `${from || "Start"} to ${to || "End"}`;
-      }
-
-      function compactRows(rows) {
-        return rows
-          .map(([label, value]) => [label, value || ""])
-          .filter(([, value]) => value !== "" && value !== null && value !== undefined);
-      }
-
-      function renderSpecTable(rows) {
-        if (!rows.length) {
-          return `<p class="detail-muted">Details are not included in this NAUSYS test record yet.</p>`;
-        }
-
-        return `
-          <div class="spec-table">
-            ${rows.map(([label, value]) => `
-              <div>
-                <span>${escapeHtml(label)}</span>
-                <strong>${escapeHtml(String(value))}</strong>
-              </div>
-            `).join("")}
-          </div>
-        `;
-      }
-
-      function renderRows(title, rows = []) {
-        if (!rows.length) return "";
-
-        return `
-          <div class="detail-data-group">
-            <h3>${escapeHtml(title)}</h3>
-            <div class="detail-id-list">
-              ${rows.slice(0, 8).map((item) => `
-                <div>
-                  <span>${escapeHtml(item.name || item.type || item.id || "Record")}</span>
-                  <strong>${escapeHtml(item.price ? `${item.currency || currency} ${item.price}` : item.periodFrom ? `${item.periodFrom} - ${item.periodTo || ""}` : item.id || "Available")}</strong>
-                </div>
-              `).join("")}
-            </div>
-          </div>
-        `;
-      }
-
-      function equipmentLabel(item) {
-        return item.name || (item.equipmentId ? `Equipment ID ${item.equipmentId}` : item.id ? `Equipment record ${item.id}` : "Equipment item");
-      }
-
-      function priceLabel(item) {
-        if (item.price) return `${item.currency || currency} ${item.price}`;
-        if (item.obligatory) return "Obligatory";
-        return item.priceMeasureId ? `Measure ID ${item.priceMeasureId}` : "On request";
-      }
-
-      function meters(value) {
-        return value ? `${value} m` : "";
-      }
-
-      function litres(value) {
-        return value ? `${value} l` : "";
-      }
-
-      function escapeHtml(value) {
-        return String(value ?? "")
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-          .replaceAll('"', "&quot;")
-          .replaceAll("'", "&#039;");
-      }
-    </script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js?v=boat-page-v2"></script>
   </body>
 </html>
