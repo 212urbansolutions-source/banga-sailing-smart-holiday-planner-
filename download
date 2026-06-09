@@ -1,0 +1,235 @@
+const NAUSYS_BASE_URL = "https://ws.nausys.com/CBMS-external/rest";
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&fit=crop&w=1200&q=82";
+
+module.exports = async function handler(request, response) {
+  response.setHeader("Access-Control-Allow-Origin", "*");
+  response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  response.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (request.method === "OPTIONS") {
+    return response.status(204).end();
+  }
+
+  const username = process.env.NAUSYS_USERNAME;
+  const password = process.env.NAUSYS_PASSWORD;
+
+  if (!username || !password) {
+    return response.status(500).json({
+      error: "Missing NAUSYS_USERNAME or NAUSYS_PASSWORD in Vercel Environment Variables.",
+    });
+  }
+
+  const body =
+    typeof request.body === "string" ? JSON.parse(request.body || "{}") : request.body || {};
+  const yachtId = request.query?.id || body.id || body.yachtId;
+
+  if (!yachtId) {
+    return response.status(400).json({ error: "Missing NAUSYS yacht id." });
+  }
+
+  try {
+    const nausysResponse = await fetch(`${NAUSYS_BASE_URL}/catalogue/v6/yacht/${yachtId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+
+    const data = await nausysResponse.json();
+
+    if (!nausysResponse.ok || data.status !== "OK") {
+      return response.status(nausysResponse.status || 502).json({
+        error: data.message || data.error || "NAUSYS yacht detail request failed.",
+        status: data.status,
+        errorCode: data.errorCode,
+        raw: process.env.NAUSYS_DEBUG === "true" ? data : undefined,
+      });
+    }
+
+    const yacht = Array.isArray(data.yachts) ? data.yachts[0] : data.yacht || null;
+
+    if (!yacht) {
+      return response.status(404).json({ error: "Yacht was not found in NAUSYS." });
+    }
+
+    return response.status(200).json({
+      source: "nausys",
+      status: data.status,
+      yacht: normalizeYacht(yacht),
+    });
+  } catch (error) {
+    return response.status(500).json({
+      error: error.message || "Could not connect to NAUSYS yacht detail API.",
+    });
+  }
+};
+
+function normalizeYacht(yacht) {
+  const yachtId = yacht.id;
+  const pictures = normalizePictures(yacht, yachtId);
+  const standardEquipment = normalizeEquipmentList(yacht.standardYachtEquipment);
+  const additionalEquipment = normalizeEquipmentList(yacht.additionalYachtEquipment);
+
+  return {
+    id: yachtId,
+    name: cleanName(yacht.name) || `NAUSYS yacht ${yachtId}`,
+    modelId: yacht.yachtModelId || "",
+    modelName: yacht.modelName || yacht.yachtModelName || yacht.yachtModel?.name || "",
+    builderName: yacht.builderName || yacht.yachtBuilderName || yacht.yachtBuilder?.name || "",
+    categoryName: yacht.categoryName || yacht.yachtCategoryName || yacht.yachtCategory?.name || "",
+    companyId: yacht.companyId || "",
+    companyName: yacht.companyName || yacht.charterCompanyName || "",
+    baseId: yacht.baseId || "",
+    baseName: yacht.baseName || yacht.charterBaseName || yacht.base?.name || "",
+    locationId: yacht.locationId || "",
+    locationName: yacht.locationName || yacht.location?.name || "",
+    type: inferBoatType(yacht),
+    cabins: yacht.cabins || 0,
+    cabinsCrew: yacht.cabinsCrew || 0,
+    berthsCabin: yacht.berthsCabin || 0,
+    berthsSalon: yacht.berthsSalon || 0,
+    berthsCrew: yacht.berthsCrew || 0,
+    berthsTotal: yacht.berthsTotal || 0,
+    wc: yacht.wc || 0,
+    wcCrew: yacht.wcCrew || 0,
+    buildYear: yacht.buildYear || yacht.year || "",
+    refitYear: yacht.refitYear || "",
+    loa: yacht.loa || yacht.length || "",
+    beam: yacht.beam || "",
+    draft: yacht.draft || "",
+    engines: yacht.engines || "",
+    enginePower: yacht.enginePower || "",
+    fuelTank: yacht.fuelTank || yacht.fuelCapacity || "",
+    waterTank: yacht.waterTank || yacht.waterCapacity || "",
+    sailTypeId: yacht.sailTypeId || "",
+    steeringTypeId: yacht.steeringTypeId || "",
+    rating: Number(yacht.euminia?.total || 4.6),
+    reviews: yacht.euminia?.reviews || "",
+    deposit: yacht.deposit || "",
+    depositWhenInsured: yacht.depositWhenInsured || "",
+    commission: yacht.commission || "",
+    checkIn: yacht.checkIn || yacht.checkInTime || "",
+    checkOut: yacht.checkOut || yacht.checkOutTime || "",
+    mainPictureUrl: pictures[0] || imageFromId(yachtId),
+    pictures,
+    standardEquipment,
+    additionalEquipment,
+    standardEquipmentCount: standardEquipment.length,
+    additionalEquipmentCount: additionalEquipment.length,
+    services: normalizePriceRows(yacht.services),
+    prices: normalizePriceRows(yacht.prices),
+    regularDiscounts: normalizePriceRows(yacht.regularDiscounts),
+    highlights: textValue(yacht.highlights) || textValue(yacht.highlightsIntText),
+    note: textValue(yacht.note) || textValue(yacht.noteIntText),
+    equipmentHighlights: equipmentHighlights(yacht, standardEquipment, additionalEquipment),
+    rawAvailable: process.env.NAUSYS_DEBUG === "true",
+  };
+}
+
+function normalizePictures(yacht, yachtId) {
+  const urls = [];
+  addPicture(urls, yacht.mainPictureUrl);
+
+  for (const item of yacht.picturesURL || []) {
+    addPicture(urls, item);
+  }
+
+  for (const item of yacht.pictures || []) {
+    addPicture(urls, item?.src);
+  }
+
+  if (!urls.length && yachtId) {
+    urls.push(imageFromId(yachtId));
+  }
+
+  return [...new Set(urls)].slice(0, 8);
+}
+
+function addPicture(urls, value) {
+  const url = cleanImageUrl(value);
+  if (url) {
+    urls.push(url);
+  }
+}
+
+function cleanImageUrl(value) {
+  if (!value || typeof value !== "string") return "";
+  const match = value.match(/https?:\/\/\S+/);
+  return match ? `${match[0].replace(/[",]+$/, "")}?w=1200` : "";
+}
+
+function imageFromId(yachtId) {
+  return yachtId ? `${NAUSYS_BASE_URL}/yacht/${yachtId}/pictures/main.jpg?w=1200` : FALLBACK_IMAGE;
+}
+
+function cleanName(value) {
+  if (!value || typeof value !== "string") return "";
+  return value.replace(/^["\s,]+|["\s,]+$/g, "").trim();
+}
+
+function inferBoatType(yacht) {
+  const text = `${yacht.categoryName || ""} ${yacht.yachtCategoryName || ""} ${yacht.modelName || ""}`.toLowerCase();
+  if (text.includes("catamaran")) return "Catamaran";
+  if (text.includes("motor")) return "Motor yacht";
+  if (text.includes("power")) return "Powerboat";
+  return "Sailing yacht";
+}
+
+function equipmentHighlights(yacht, standardEquipment, additionalEquipment) {
+  const text = JSON.stringify([standardEquipment, additionalEquipment]).toLowerCase();
+  const highlights = [];
+
+  if (text.includes("air") || text.includes("a/c")) highlights.push("Air conditioning");
+  if (text.includes("generator")) highlights.push("Generator");
+  if (text.includes("dinghy")) highlights.push("Dinghy");
+  if (text.includes("sup")) highlights.push("SUP");
+  if (text.includes("bow")) highlights.push("Bow thruster");
+
+  return highlights.length ? highlights : ["Inventory details from NAUSYS", "Equipment list available by API"];
+}
+
+function normalizeEquipmentList(items) {
+  return (Array.isArray(items) ? items : [])
+    .map((item) => ({
+      id: item.id || "",
+      equipmentId: item.equipmentId || item.extraId || "",
+      name: item.name || item.equipmentName || textValue(item.text) || textValue(item.nameIntText) || "",
+      quantity: item.quantity || item.quantityExtras || "",
+      price: item.price || item.amount || item.listPrice || "",
+      currency: item.currency || "",
+      priceMeasureId: item.priceMeasureId || "",
+      obligatory: Boolean(item.obligatory),
+    }))
+    .filter((item) => item.id || item.equipmentId || item.name);
+}
+
+function normalizePriceRows(items) {
+  return (Array.isArray(items) ? items : [])
+    .map((item) => ({
+      id: item.id || item.serviceId || item.discountItemId || "",
+      name: item.name || item.serviceName || textValue(item.nameIntText) || "",
+      type: item.type || item.calculationType || "",
+      price: item.price || item.amount || item.listPrice || item.clientPrice || "",
+      currency: item.currency || "",
+      priceMeasureId: item.priceMeasureId || "",
+      obligatory: Boolean(item.obligatory),
+      periodFrom: item.periodFrom || item.dateFrom || "",
+      periodTo: item.periodTo || item.dateTo || "",
+    }))
+    .filter((item) => item.id || item.name || item.price || item.periodFrom);
+}
+
+function textValue(value) {
+  if (!value) return "";
+  if (typeof value === "string") return value.trim();
+  if (typeof value !== "object") return "";
+
+  for (const key of ["en", "EN", "eng", "text", "value", "name"]) {
+    if (typeof value[key] === "string" && value[key].trim()) {
+      return value[key].trim();
+    }
+  }
+
+  const first = Object.values(value).find((item) => typeof item === "string" && item.trim());
+  return first ? first.trim() : "";
+}
