@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+  <title id="title">Yacht provisioning groceries</title>
+  <desc id="desc">A minimal grocery market scene with fresh produce, bread, water, and a sailing line.</desc>
+  <defs>
+    <linearGradient id="sea" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#d8fff8"/>
+      <stop offset="1" stop-color="#6ddbd6"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#fff4b8"/>
+      <stop offset="1" stop-color="#ffc800"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="680" fill="#f7fffc"/>
+  <rect y="430" width="1200" height="250" fill="url(#sea)"/>
+  <circle cx="1000" cy="118" r="76" fill="url(#sun)"/>
+  <path d="M0 430c170-54 292 32 468-16 181-50 322-62 514 2 90 30 154 18 218-4v268H0z" fill="#00a3b5" opacity=".22"/>
+  <path d="M90 488c128-62 268-10 392-48 170-52 264-58 422-2 72 26 142 32 206 6" fill="none" stroke="#009fb1" stroke-width="18" stroke-linecap="round" opacity=".55"/>
+  <g transform="translate(130 110)">
+    <rect x="0" y="190" width="660" height="300" rx="28" fill="#ffffff" stroke="#cbe9e5" stroke-width="5"/>
+    <rect x="46" y="238" width="568" height="32" rx="16" fill="#073642" opacity=".12"/>
+    <rect x="70" y="286" width="520" height="150" rx="20" fill="#e9fffb"/>
+    <g transform="translate(104 316)">
+      <circle cx="42" cy="42" r="34" fill="#47b96d"/>
+      <circle cx="118" cy="40" r="31" fill="#ffcc4d"/>
+      <circle cx="190" cy="42" r="34" fill="#f45648"/>
+      <circle cx="268" cy="42" r="31" fill="#2ebd83"/>
+      <circle cx="344" cy="40" r="34" fill="#ffc800"/>
+      <circle cx="424" cy="42" r="31" fill="#0aa6b5"/>
+    </g>
+    <path d="M98 466h464" stroke="#073642" stroke-width="10" stroke-linecap="round" opacity=".25"/>
+    <path d="M60 198l44-74h452l44 74" fill="#ffffff" stroke="#073642" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M172 122c10-44 62-64 96-30-12 44-58 68-96 30z" fill="#58bd69"/>
+    <path d="M360 88c50 4 84 48 72 96-48-2-86-42-72-96z" fill="#f6a93a"/>
+    <path d="M470 118c46-28 102-4 116 50-46 28-104 8-116-50z" fill="#f06150"/>
+  </g>
+  <g transform="translate(760 250)">
+    <path d="M172 0v168M172 18 80 160h92" fill="none" stroke="#073642" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M204 44c58 68 72 124 46 178" fill="none" stroke="#00a3b5" stroke-width="12" stroke-linecap="round"/>
+    <path d="M60 182h282l-38 54H96z" fill="#ffffff" stroke="#073642" stroke-width="11" stroke-linejoin="round"/>
+    <path d="M20 246c98-60 212 56 382-16" fill="none" stroke="#00a3b5" stroke-width="15" stroke-linecap="round"/>
+  </g>
+</svg>

@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+  <title id="title">Prevailing sailing winds</title>
+  <desc id="desc">A sailing yacht with wind lines and a windrose for Meltemi, Bora, Jugo, and Mistral.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#d9fff8"/>
+      <stop offset=".52" stop-color="#83e1dd"/>
+      <stop offset="1" stop-color="#008da5"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="680" fill="url(#bg)"/>
+  <path d="M0 458c178-62 360 32 540-28 214-72 392-54 660 28v222H0z" fill="#007f99" opacity=".45"/>
+  <path d="M80 530c174-76 320 48 528-20 208-68 316-46 512 16" fill="none" stroke="#eafffb" stroke-width="14" stroke-linecap="round" opacity=".7"/>
+  <g transform="translate(142 128)" fill="none" stroke="#ffffff" stroke-width="14" stroke-linecap="round" opacity=".92">
+    <path d="M0 54h360"/>
+    <path d="M58 130h260"/>
+    <path d="M22 206h312"/>
+    <path d="M650 70h290"/>
+    <path d="M720 150h228"/>
+  </g>
+  <g transform="translate(660 92)">
+    <circle cx="174" cy="174" r="150" fill="#ffffff" opacity=".78" stroke="#073642" stroke-width="8"/>
+    <path d="M174 34v280M34 174h280" stroke="#073642" stroke-width="5" opacity=".25"/>
+    <path d="M174 58l32 116-32 116-32-116z" fill="#00a3b5" opacity=".84"/>
+    <path d="M58 174l116-32 116 32-116 32z" fill="#ffc800" opacity=".78"/>
+    <circle cx="174" cy="174" r="34" fill="#073642"/>
+    <text x="164" y="26" font-family="Arial, sans-serif" font-size="26" font-weight="900" fill="#073642">N</text>
+    <text x="326" y="184" font-family="Arial, sans-serif" font-size="26" font-weight="900" fill="#073642">E</text>
+    <text x="165" y="344" font-family="Arial, sans-serif" font-size="26" font-weight="900" fill="#073642">S</text>
+    <text x="4" y="184" font-family="Arial, sans-serif" font-size="26" font-weight="900" fill="#073642">W</text>
+    <text x="74" y="408" font-family="Arial, sans-serif" font-size="27" font-weight="900" fill="#073642">Meltemi / Bora / Jugo</text>
+  </g>
+  <g transform="translate(188 260)">
+    <path d="M240 0v210M240 22 100 210h140" fill="#ffffff" stroke="#073642" stroke-width="13" stroke-linejoin="round"/>
+    <path d="M282 52c80 92 98 168 60 242" fill="#d7fffb" stroke="#00a3b5" stroke-width="13" stroke-linecap="round"/>
+    <path d="M66 232h430l-58 76H122z" fill="#ffffff" stroke="#073642" stroke-width="13" stroke-linejoin="round"/>
+    <path d="M22 330c124-70 256 58 500-18" fill="none" stroke="#ffffff" stroke-width="18" stroke-linecap="round"/>
+  </g>
+</svg>

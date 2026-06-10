@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+  <title id="title">Sailing season calendar</title>
+  <desc id="desc">A Mediterranean sailing calendar with islands, sun, and yacht route lines.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#b7f4ff"/>
+      <stop offset="1" stop-color="#f9fff7"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#54d7d2"/>
+      <stop offset="1" stop-color="#008da5"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="680" fill="url(#sky)"/>
+  <circle cx="1004" cy="126" r="82" fill="#ffc800"/>
+  <path d="M0 392c178-38 298 32 470-5 176-38 330-44 494 8 92 29 168 22 236-2v287H0z" fill="url(#water)"/>
+  <path d="M56 470c164-60 318 42 498-14 178-56 302-44 524 18" fill="none" stroke="#eafffb" stroke-width="11" stroke-linecap="round" opacity=".65"/>
+  <g transform="translate(82 80)">
+    <rect x="0" y="0" width="418" height="320" rx="32" fill="#ffffff" stroke="#cbe9e5" stroke-width="6"/>
+    <rect x="0" y="0" width="418" height="86" rx="32" fill="#073642"/>
+    <text x="42" y="58" font-family="Arial, sans-serif" font-size="34" font-weight="800" fill="#ffffff">Best months</text>
+    <g fill="#e9fffb" stroke="#9ce8e7" stroke-width="4">
+      <rect x="40" y="120" width="82" height="64" rx="14"/>
+      <rect x="150" y="120" width="82" height="64" rx="14"/>
+      <rect x="260" y="120" width="82" height="64" rx="14"/>
+      <rect x="40" y="210" width="82" height="64" rx="14"/>
+      <rect x="150" y="210" width="82" height="64" rx="14"/>
+      <rect x="260" y="210" width="82" height="64" rx="14"/>
+    </g>
+    <text x="62" y="162" font-family="Arial, sans-serif" font-size="25" font-weight="800" fill="#073642">May</text>
+    <text x="176" y="162" font-family="Arial, sans-serif" font-size="25" font-weight="800" fill="#073642">Jun</text>
+    <text x="290" y="162" font-family="Arial, sans-serif" font-size="25" font-weight="800" fill="#073642">Jul</text>
+    <text x="62" y="252" font-family="Arial, sans-serif" font-size="25" font-weight="800" fill="#073642">Aug</text>
+    <text x="176" y="252" font-family="Arial, sans-serif" font-size="25" font-weight="800" fill="#073642">Sep</text>
+    <text x="290" y="252" font-family="Arial, sans-serif" font-size="25" font-weight="800" fill="#073642">Oct</text>
+    <path d="M170 186l50 44 96-112" fill="none" stroke="#ffc800" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <g transform="translate(650 200)">
+    <path d="M190 10v172M190 28 86 172h104" fill="none" stroke="#073642" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M224 52c62 70 78 130 50 188" fill="none" stroke="#00a3b5" stroke-width="12" stroke-linecap="round"/>
+    <path d="M62 196h324l-42 58H106z" fill="#ffffff" stroke="#073642" stroke-width="11" stroke-linejoin="round"/>
+    <path d="M0 278c106-56 228 48 420-14" fill="none" stroke="#ffffff" stroke-width="16" stroke-linecap="round" opacity=".9"/>
+  </g>
+  <path d="M684 432c28-42 98-52 142-16 42-42 118-34 148 18-88 38-202 38-290-2z" fill="#f6e5b3" opacity=".92"/>
+</svg>
